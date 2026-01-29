@@ -49,6 +49,7 @@
   "nav": {
     "home": "Главная",
     "services": "Услуги",
+    "tickets": "Поддержка",
     "payments": "Платежи",
     "withdrawals": "Списания"
   },
@@ -228,5 +229,53 @@
     "loginWithPasskey": "Войти с Passkey",
     "enterLogin": "Введите логин",
     "authError": "Не удалось войти через Passkey"
+  },
+  "tickets": {
+    "title": "Поддержка",
+    "createTicket": "Создать обращение",
+    "noTickets": "У вас пока нет обращений",
+    "noActiveTickets": "Нет активных обращений",
+    "closedAndArchived": "Закрытые и архивные",
+    "newMessage": "Новое",
+    "subject": "Тема",
+    "subjectPlaceholder": "Введите тему обращения",
+    "message": "Сообщение",
+    "messagePlaceholder": "Введите ваше сообщение...",
+    "category": "Категория",
+    "selectCategory": "Выберите категорию",
+    "priorityLabel": "Приоритет",
+    "ticketTypeLabel": "Тип обращения",
+    "selectService": "Выберите услугу",
+    "selectServicePlaceholder": "Выберите услугу, с которой связана проблема",
+    "noServices": "У вас нет активных услуг",
+    "send": "Отправить",
+    "closeTicket": "Закрыть",
+    "ticketCreated": "Обращение создано",
+    "ticketClosed": "Обращение закрыто",
+    "createError": "Не удалось создать обращение",
+    "closeError": "Не удалось закрыть обращение",
+    "sendError": "Не удалось отправить сообщение",
+    "fillRequired": "Заполните все обязательные поля",
+    "attachFile": "Прикрепить файл",
+    "fileTooLarge": "Файл {{name}} слишком большой (макс. 5 МБ)",
+    "fileTypeNotAllowed": "Тип файла {{name}} не поддерживается",
+    "status": {
+      "open": "Открыто",
+      "in_progress": "В работе",
+      "waiting": "Ожидает ответа",
+      "closed": "Закрыто",
+      "archived": "В архиве"
+    },
+    "priority": {
+      "low": "Низкий",
+      "normal": "Обычный",
+      "high": "Высокий",
+      "urgent": "Срочный"
+    },
+    "ticketType": {
+      "service": "Проблема с услугой",
+      "payment": "Платёж / Баланс",
+      "other": "Другое"
+    }
   }
 }

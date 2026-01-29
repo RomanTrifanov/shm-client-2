@@ -49,6 +49,7 @@
   "nav": {
     "home": "Home",
     "services": "Services",
+    "tickets": "Support",
     "payments": "Payments",
     "withdrawals": "Withdrawals"
   },
@@ -228,5 +229,53 @@
     "loginWithPasskey": "Sign in with Passkey",
     "enterLogin": "Enter your login",
     "authError": "Failed to sign in with Passkey"
+  },
+  "tickets": {
+    "title": "Support",
+    "createTicket": "New Request",
+    "noTickets": "You don't have any support requests yet",
+    "noActiveTickets": "No active requests",
+    "closedAndArchived": "Closed and Archived",
+    "newMessage": "New",
+    "subject": "Subject",
+    "subjectPlaceholder": "Enter subject",
+    "message": "Message",
+    "messagePlaceholder": "Enter your message...",
+    "category": "Category",
+    "selectCategory": "Select category",
+    "priorityLabel": "Priority",
+    "ticketTypeLabel": "Request Type",
+    "selectService": "Select Service",
+    "selectServicePlaceholder": "Select the service related to your issue",
+    "noServices": "You don't have any active services",
+    "send": "Send",
+    "closeTicket": "Close",
+    "ticketCreated": "Request created",
+    "ticketClosed": "Request closed",
+    "createError": "Failed to create request",
+    "closeError": "Failed to close request",
+    "sendError": "Failed to send message",
+    "fillRequired": "Please fill in all required fields",
+    "attachFile": "Attach file",
+    "fileTooLarge": "File {{name}} is too large (max 5 MB)",
+    "fileTypeNotAllowed": "File type {{name}} is not supported",
+    "status": {
+      "open": "Open",
+      "in_progress": "In Progress",
+      "waiting": "Awaiting Reply",
+      "closed": "Closed",
+      "archived": "Archived"
+    },
+    "priority": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "ticketType": {
+      "service": "Service Issue",
+      "payment": "Payment / Balance",
+      "other": "Other"
+    }
   }
 }

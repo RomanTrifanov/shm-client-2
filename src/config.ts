@@ -6,8 +6,6 @@ interface AppConfig {
   APP_NAME: string;
   TELEGRAM_BOT_NAME: string;
   TELEGRAM_BOT_AUTH_ENABLE: string;
-  TELEGRAM_WEBAPP_AUTH_ENABLE: string;
-  TELEGRAM_PROFILE: string;
   SUPPORT_LINK: string;
 }
 
@@ -25,8 +23,6 @@ function getConfig(): AppConfig {
     APP_NAME: runtimeConfig?.APP_NAME || import.meta.env.VITE_APP_NAME || 'SHM Client',
     TELEGRAM_BOT_NAME: runtimeConfig?.TELEGRAM_BOT_NAME || import.meta.env.VITE_TELEGRAM_BOT_NAME || '',
     TELEGRAM_BOT_AUTH_ENABLE: runtimeConfig?.TELEGRAM_BOT_AUTH_ENABLE || import.meta.env.VITE_TELEGRAM_BOT_AUTH_ENABLE || 'false',
-    TELEGRAM_WEBAPP_AUTH_ENABLE: runtimeConfig?.TELEGRAM_WEBAPP_AUTH_ENABLE || import.meta.env.VITE_TELEGRAM_WEBAPP_AUTH_ENABLE || 'false',
-    TELEGRAM_PROFILE: runtimeConfig?.TELEGRAM_PROFILE || import.meta.env.VITE_TELEGRAM_PROFILE || 'telegram_bot',
     SUPPORT_LINK: runtimeConfig?.SUPPORT_LINK || import.meta.env.VITE_SUPPORT_LINK || '',
   };
 }

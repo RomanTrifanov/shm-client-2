@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, Text, Stack, Group, Badge, Button, Modal, ActionIcon, Loader, Center, Paper, Title, Tabs, Code, CopyButton, Tooltip, Accordion, Box } from '@mantine/core';
-import { IconQrcode, IconCopy, IconCheck, IconDownload, IconRefresh, IconChevronRight, IconTrash, IconPlus, IconPlayerStop } from '@tabler/icons-react';
+import { IconQrcode, IconCopy, IconCheck, IconDownload, IconRefresh, IconTrash, IconPlus, IconPlayerStop } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 import { api, userApi } from '../api/client';
@@ -338,37 +338,97 @@ function ServiceDetail({ service, onDelete }: ServiceDetailProps) {
   );
 }
 
-function ServiceCard({ service, onClick, isChild = false }: { service: UserService; onClick: () => void; isChild?: boolean }) {
+function ServiceCard({ service, onClick, isChild = false, isLastChild = false }: { service: UserService; onClick: () => void; isChild?: boolean; isLastChild?: boolean }) {
   const { t, i18n } = useTranslation();
   const statusColor = statusColors[service.status] || 'gray';
   const statusLabel = t(`status.${service.status}`, service.status);
+
+  if (isChild) {
+    return (
+      <Group gap={0} wrap="nowrap" align="stretch">
+        {/* Вертикальная и горизонтальная линия дерева */}
+        <Box
+          style={{
+            width: 24,
+            position: 'relative',
+            flexShrink: 0,
+          }}
+        >
+          {/* Вертикальная линия */}
+          <Box
+            style={{
+              position: 'absolute',
+              left: 10,
+              top: 0,
+              bottom: isLastChild ? '50%' : 0,
+              width: 2,
+              backgroundColor: 'var(--mantine-color-gray-4)',
+            }}
+          />
+          {/* Горизонтальная линия */}
+          <Box
+            style={{
+              position: 'absolute',
+              left: 10,
+              top: '50%',
+              width: 14,
+              height: 2,
+              backgroundColor: 'var(--mantine-color-gray-4)',
+            }}
+          />
+        </Box>
+        <Card
+          withBorder
+          radius="md"
+          p="sm"
+          style={{ cursor: 'pointer', flex: 1 }}
+          onClick={onClick}
+        >
+          <Group justify="space-between">
+            <div>
+              <Text fw={500} size="sm">{service.service.name}</Text>
+              {service.expire && (
+                <Text size="xs" c="dimmed">
+                  {new Date(service.expire as string).toLocaleDateString(i18n.language === 'ru' ? 'ru-RU' : 'en-US')}
+                </Text>
+              )}
+            </div>
+            <Group gap="sm">
+              {service.service.cost > 0 && (
+                <Text size="sm" c="dimmed">{service.service.cost} {t('common.currency')}</Text>
+              )}
+              <Badge color={statusColor} variant="light" size="sm">
+                {statusLabel}
+              </Badge>
+            </Group>
+          </Group>
+        </Card>
+      </Group>
+    );
+  }
 
   return (
     <Card
       withBorder
       radius="md"
-      p={isChild ? 'sm' : 'md'}
-      ml={isChild ? 'lg' : 0}
+      p="md"
       style={{ cursor: 'pointer' }}
       onClick={onClick}
     >
       <Group justify="space-between">
-        <Group gap="sm">
-          {isChild && <IconChevronRight size={14} color="gray" />}
-          <div>
-            <Text fw={500} size={isChild ? 'sm' : 'md'}>{service.service.name}</Text>
-            {service.expire && (
-              <Text size="xs" c="dimmed">
-                {new Date(service.expire as string).toLocaleDateString(i18n.language === 'ru' ? 'ru-RU' : 'en-US')}
-              </Text>
-            )}
-          </div>
-        </Group>
+        <div>
+          <Text fw={500}>{service.service.name}</Text>
+          {service.expire && (
+            <Text size="xs" c="dimmed">
+              {new Date(service.expire as string).toLocaleDateString(i18n.language === 'ru' ? 'ru-RU' : 'en-US')}
+            </Text>
+          )}
+        </div>
         <Group gap="sm">
           {service.service.cost > 0 && (
             <Text size="sm" c="dimmed">{service.service.cost} {t('common.currency')}</Text>
           )}
-          <Badge color={statusColor} variant="light" size={isChild ? 'sm' : 'md'}>
+          <Badge color={statusColor} variant="light">
             {statusLabel}
           </Badge>
         </Group>
@@ -539,13 +599,14 @@ export default function Services() {
                         onClick={() => handleServiceClick(service)}
                       />
                       {service.children && service.children.length > 0 && (
-                        <Stack gap="xs" mt="xs">
-                          {service.children.map((child) => (
+                        <Stack gap="xs" mt="xs" ml="md">
+                          {service.children.map((child, index) => (
                             <ServiceCard
                               key={child.user_service_id}
                               service={child}
                               onClick={() => handleServiceClick(child)}
                               isChild
+                              isLastChild={index === service.children!.length - 1}
                             />
                           ))}
                         </Stack>

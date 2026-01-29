@@ -195,3 +195,19 @@ export const passkeyApi = {
     };
   }) => api.post<{ data: { id: string } }>('/user/passkey/auth/public', data),
 };
+
+// Tickets API
+export const ticketApi = {
+  list: (status?: string) => api.get('/user/ticket', { params: status ? { status } : {} }),
+  get: (ticketId: number) => api.get(`/user/ticket/${ticketId}`),
+  create: (data: {
+    subject: string;
+    message: string;
+    priority?: string;
+    ticket_type?: string;
+    user_service_id?: number;
+  }) => api.put('/user/ticket', data),
+  sendMessage: (ticketId: number, message: string, media?: Array<{name: string; type: string; size: number; data: string}>) =>
+    api.post(`/user/ticket/${ticketId}/message`, { message, media }),
+  close: (ticketId: number) => api.post(`/user/ticket/${ticketId}/close`),
+};
