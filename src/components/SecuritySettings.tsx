@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, Text, Stack, Group, Button, Divider, Modal, PasswordInput } from '@mantine/core';
 import { IconShieldLock, IconLock } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
@@ -7,11 +7,31 @@ import { userApi } from '../api/client';
 import PasskeySettings from './PasskeySettings';
 import OtpSettings from './OtpSettings';
 import PasswordAuthSettings from './PasswordAuthSettings';
+import { config } from '../config';
 
 export default function SecuritySettings() {
   const { t } = useTranslation();
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [isInsideTelegramWebApp, setIsInsideTelegramWebApp] = useState(false);
+
+  useEffect(() => {
+    const checkTelegramWebApp = () => {
+      const tgWebApp = window.Telegram?.WebApp;
+      const isInside = !!(tgWebApp && (
+        (tgWebApp.initData && tgWebApp.initData.length > 0) ||
+        tgWebApp.initDataUnsafe?.user?.id
+      ));
+      setIsInsideTelegramWebApp(isInside);
+    };
+
+    // Проверяем сразу
+    checkTelegramWebApp();
+
+    // И ещё раз через небольшую задержку (скрипт мог не успеть загрузиться)
+    const timer = setTimeout(checkTelegramWebApp, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleChangePassword = async () => {
     if (!newPassword) {
@@ -40,6 +60,9 @@ export default function SecuritySettings() {
     }
   };
 
+  const hasTelegramWidget = !isInsideTelegramWebApp && !!config.TELEGRAM_BOT_NAME && config.TELEGRAM_BOT_AUTH_ENABLE === 'true';
+
+
   return (
     <>
       <Card withBorder radius="md" p="lg">
@@ -49,8 +72,9 @@ export default function SecuritySettings() {
         </Group>
 
         <Stack gap="lg">
-          {/* Passkey */}
-          <PasskeySettings embedded />
+          {hasTelegramWidget && (
+            <PasskeySettings embedded />
+          )}
 
           <Divider />
 
@@ -59,8 +83,9 @@ export default function SecuritySettings() {
 
           <Divider />
 
-          {/* Отключение входа по паролю */}
-          <PasswordAuthSettings embedded />
+          {hasTelegramWidget && (
+            <PasswordAuthSettings embedded />
+          )}
 
           {/* Изменение пароля */}
           <Stack gap="xs">

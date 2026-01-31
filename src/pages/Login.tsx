@@ -311,7 +311,7 @@ export default function Login() {
               >
                 {mode === 'login' ? t('auth.login') : t('auth.register')}
               </Button>
-              {mode === 'login' && isWebAuthnSupported && (
+              {mode === 'login' && isWebAuthnSupported && hasTelegramWidget && (
                 <Button
                   variant="light"
                   leftSection={<IconFingerprint size={18} />}
@@ -376,8 +376,8 @@ export default function Login() {
             }}>
               {t('common.cancel')}
             </Button>
-            <Button 
-              onClick={handleOtpSubmit} 
+            <Button
+              onClick={handleOtpSubmit}
               loading={loading}
               disabled={!otpToken}
             >
