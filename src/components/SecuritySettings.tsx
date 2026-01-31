@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, Text, Stack, Group, Button, Divider, Modal, PasswordInput } from '@mantine/core';
 import { IconShieldLock, IconLock } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
@@ -8,30 +8,13 @@ import PasskeySettings from './PasskeySettings';
 import OtpSettings from './OtpSettings';
 import PasswordAuthSettings from './PasswordAuthSettings';
 import { config } from '../config';
+import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
 
 export default function SecuritySettings() {
   const { t } = useTranslation();
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
-  const [isInsideTelegramWebApp, setIsInsideTelegramWebApp] = useState(false);
-
-  useEffect(() => {
-    const checkTelegramWebApp = () => {
-      const tgWebApp = window.Telegram?.WebApp;
-      const isInside = !!(tgWebApp && (
-        (tgWebApp.initData && tgWebApp.initData.length > 0) ||
-        tgWebApp.initDataUnsafe?.user?.id
-      ));
-      setIsInsideTelegramWebApp(isInside);
-    };
-
-    // Проверяем сразу
-    checkTelegramWebApp();
-
-    // И ещё раз через небольшую задержку (скрипт мог не успеть загрузиться)
-    const timer = setTimeout(checkTelegramWebApp, 100);
-    return () => clearTimeout(timer);
-  }, []);
+  const { isInsideTelegramWebApp } = useTelegramWebApp();
 
   const handleChangePassword = async () => {
     if (!newPassword) {
@@ -72,18 +55,18 @@ export default function SecuritySettings() {
         </Group>
 
         <Stack gap="lg">
-          {hasTelegramWidget && (
-            <PasskeySettings embedded />
-          )}
-
-          <Divider />
 
           {/* OTP / 2FA */}
           <OtpSettings embedded />
 
-          <Divider />
-
           {hasTelegramWidget && (
+
+            <Divider />
+
+            <PasskeySettings embedded />
+
+            <Divider />
+
             <PasswordAuthSettings embedded />
           )}
 

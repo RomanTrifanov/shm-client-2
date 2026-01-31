@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, Text, Stack, Button, TextInput, PasswordInput, Divider, Title, Center, Modal, Group } from '@mantine/core';
 import { IconLogin, IconUserPlus, IconFingerprint, IconShieldLock, IconBrandTelegram } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
@@ -8,6 +8,7 @@ import { setCookie } from '../api/cookie';
 import { useStore } from '../store/useStore';
 import TelegramLoginButton, { TelegramUser } from '../components/TelegramLoginButton';
 import { config } from '../config';
+import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
 
 function base64UrlToArrayBuffer(base64url: string): ArrayBuffer {
   const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
@@ -29,68 +30,18 @@ function arrayBufferToBase64Url(buffer: ArrayBuffer): string {
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-// Telegram Web App integration
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: {
-        initData: string;
-        initDataUnsafe: {
-          user?: {
-            id: number;
-            first_name: string;
-            last_name?: string;
-            username?: string;
-            photo_url?: string;
-          };
-        };
-        ready: () => void;
-        expand: () => void;
-        close: () => void;
-        setHeaderColor: (color: string) => void;
-        setBackgroundColor: (color: string) => void;
-        BackButton: {
-          show: () => void;
-          hide: () => void;
-          onClick: (callback: () => void) => void;
-          offClick: (callback: () => void) => void;
-        };
-      };
-    };
-  }
-}
-
 export default function Login() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [loading, setLoading] = useState(false);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [formData, setFormData] = useState({ login: '', password: '', confirmPassword: '' });
-  const [isInsideTelegramWebApp, setIsInsideTelegramWebApp] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otpToken, setOtpToken] = useState('');
   const [showLoginForm, setShowLoginForm] = useState(false);
   const { setUser, setTelegramPhoto } = useStore();
   const { t } = useTranslation();
   const isWebAuthnSupported = !!window.PublicKeyCredential;
-
-  // Проверяем Telegram WebApp при монтировании и после загрузки скрипта
-  useEffect(() => {
-    const checkTelegramWebApp = () => {
-      const tgWebApp = window.Telegram?.WebApp;
-      const isInside = !!(tgWebApp && (
-        (tgWebApp.initData && tgWebApp.initData.length > 0) ||
-        tgWebApp.initDataUnsafe?.user?.id
-      ));
-      setIsInsideTelegramWebApp(isInside);
-    };
-
-    // Проверяем сразу
-    checkTelegramWebApp();
-
-    // И ещё раз через небольшую задержку (скрипт мог не успеть загрузиться)
-    const timer = setTimeout(checkTelegramWebApp, 100);
-    return () => clearTimeout(timer);
-  }, []);
+  const { isInsideTelegramWebApp, telegramWebApp } = useTelegramWebApp();
 
   // Виджет показываем только если НЕ внутри WebApp
   const hasTelegramWidget = !isInsideTelegramWebApp && !!config.TELEGRAM_BOT_NAME && config.TELEGRAM_BOT_AUTH_ENABLE === 'true';
@@ -198,8 +149,7 @@ export default function Login() {
   };
 
   const handleTelegramWebAppAuth = async () => {
-    const tgWebApp = window.Telegram?.WebApp;
-    if (!tgWebApp?.initData) {
+    if (!telegramWebApp?.initData) {
       notifications.show({ title: t('common.error'), message: t('auth.telegramAuthError'), color: 'red' });
       return;
     }
@@ -207,15 +157,15 @@ export default function Login() {
     setLoading(true);
     try {
       const profile = config.TELEGRAM_WEBAPP_PROFILE || '';
-      await auth.telegramWebAppAuth(tgWebApp.initData, profile);
+      await auth.telegramWebAppAuth(telegramWebApp.initData, profile);
 
       const userResponse = await auth.getCurrentUser();
       const responseData = userResponse.data.data;
       const userData = Array.isArray(responseData) ? responseData[0] : responseData;
       setUser(userData);
 
-      if (tgWebApp.initDataUnsafe?.user?.photo_url) {
-        setTelegramPhoto(tgWebApp.initDataUnsafe.user.photo_url);
+      if (telegramWebApp.initDataUnsafe?.user?.photo_url) {
+        setTelegramPhoto(telegramWebApp.initDataUnsafe.user.photo_url);
       }
 
       notifications.show({ title: t('common.success'), message: t('auth.telegramAuth'), color: 'green' });

@@ -13,6 +13,7 @@ import { auth } from './api/client';
 import { getCookie, removeCookie, parseAndSavePartnerId, parseAndSaveSessionId } from './api/cookie';
 import { config } from './config';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import { isInsideTelegramWebApp } from './hooks/useTelegramWebApp';
 
 parseAndSaveSessionId();
 parseAndSavePartnerId();
@@ -43,15 +44,6 @@ const theme = createTheme({
     ],
   },
 });
-
-const isInsideTelegramWebApp = (): boolean => {
-  const tgWebApp = window.Telegram?.WebApp;
-  // initData непустая строка ИЛИ есть данные пользователя в initDataUnsafe
-  return !!(tgWebApp && (
-    (tgWebApp.initData && tgWebApp.initData.length > 0) ||
-    tgWebApp.initDataUnsafe?.user?.id
-  ));
-};
 
 function ThemeToggle() {
   const { setColorScheme } = useMantineColorScheme();
