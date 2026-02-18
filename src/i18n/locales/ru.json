@@ -128,7 +128,9 @@
     "serviceDeleted": "Услуга удалена",
     "serviceDeleteError": "Не удалось удалить услугу",
     "serviceStopped": "Услуга остановлена",
-    "serviceStopError": "Не удалось остановить услугу"
+    "serviceStopError": "Не удалось остановить услугу",
+    "amountToPay": "К оплате",
+    "payService": "Оплатить {{amount}} ₽"
   },
   "categories": {
     "vpn": "VPN",

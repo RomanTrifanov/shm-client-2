@@ -1,7 +1,8 @@
-import { Modal, Stack, Center, Text, Button, Group, CopyButton, Tooltip, ActionIcon } from '@mantine/core';
+import { Modal, Stack, Center, Text, Button, Group, Tooltip, ActionIcon } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { IconCopy, IconCheck, IconDownload } from '@tabler/icons-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 
 interface QrModalProps {
   opened: boolean;
@@ -14,6 +15,7 @@ interface QrModalProps {
 
 export default function QrModal({ opened, onClose, data, title, filename, onDownload }: QrModalProps) {
   const { t } = useTranslation();
+  const { copied, copy } = useCopyToClipboard();
 
   const handleDownloadQr = () => {
     const svg = document.getElementById('qr-code-svg');
@@ -58,20 +60,16 @@ export default function QrModal({ opened, onClose, data, title, filename, onDown
         </Text>
 
         <Group>
-          <CopyButton value={data}>
-            {({ copied, copy }) => (
-              <Tooltip label={copied ? t('common.copied') : t('common.copy')}>
-                <Button
-                  variant="light"
-                  leftSection={copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                  color={copied ? 'teal' : 'blue'}
-                  onClick={copy}
-                >
-                  {copied ? t('common.copied') : t('common.copy')}
-                </Button>
-              </Tooltip>
-            )}
-          </CopyButton>
+          <Tooltip label={copied ? t('common.copied') : t('common.copy')}>
+            <Button
+              variant="light"
+              leftSection={copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+              color={copied ? 'teal' : 'blue'}
+              onClick={() => copy(data)}
+            >
+              {copied ? t('common.copied') : t('common.copy')}
+            </Button>
+          </Tooltip>
 
           <Tooltip label={t('services.downloadQr')}>
             <ActionIcon variant="light" size="lg" onClick={handleDownloadQr}>

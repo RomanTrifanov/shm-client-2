@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Stack, Text, Card, Group, Badge, Loader, Center, Button, Paper, Divider, Select, NumberInput, Alert, Checkbox } from '@mantine/core';
+import { Modal, Stack, Text, Card, Group, Badge, Loader, Center, Button, Paper, Divider, Select, NumberInput, Alert, Checkbox, ScrollArea } from '@mantine/core';
 import { IconArrowLeft, IconCreditCard, IconCheck, IconWallet } from '@tabler/icons-react';
 import { servicesApi, userApi } from '../api/client';
 import { notifications } from '@mantine/notifications';
@@ -279,6 +279,7 @@ export default function OrderServiceModal({
           : (isChangeMode ? t('services.changeServiceTitle') : t('order.title'))
       }
       size="lg"
+      scrollAreaComponent={ScrollArea.Autosize}
     >
       {loading ? (
         <Center h={200}>

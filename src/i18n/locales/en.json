@@ -128,7 +128,9 @@
     "serviceDeleted": "Service deleted",
     "serviceDeleteError": "Failed to delete service",
     "serviceStopped": "Service stopped",
-    "serviceStopError": "Failed to stop service"
+    "serviceStopError": "Failed to stop service",
+    "amountToPay": "Amount to pay",
+    "payService": "Pay {{amount}} ₽"
   },
   "categories": {
     "vpn": "VPN",

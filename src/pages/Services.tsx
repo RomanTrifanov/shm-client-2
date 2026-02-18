@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card, Text, Stack, Group, Badge, Button, Modal, ActionIcon, Loader, Center, Paper, Title, Tabs, Code, CopyButton, Tooltip, Accordion, Box } from '@mantine/core';
-import { IconQrcode, IconCopy, IconCheck, IconDownload, IconRefresh, IconTrash, IconPlus, IconPlayerStop, IconExchange } from '@tabler/icons-react';
+import { Card, Text, Stack, Group, Badge, Button, Modal, ActionIcon, Loader, Center, Paper, Title, Tabs, Code, Tooltip, Accordion, Box, Select, NumberInput, Pagination } from '@mantine/core';
+import { IconQrcode, IconCopy, IconCheck, IconDownload, IconRefresh, IconTrash, IconPlus, IconPlayerStop, IconExchange, IconCreditCard, IconWallet } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 import { api, servicesApi, userApi } from '../api/client';
@@ -8,6 +8,23 @@ import { notifications } from '@mantine/notifications';
 import QrModal from '../components/QrModal';
 import OrderServiceModal from '../components/OrderServiceModal';
 import ConfirmModal from '../components/ConfirmModal';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
+
+interface ForecastItem {
+  name: string;
+  cost: number;
+  total: number;
+  status: string;
+  user_service_id: string;
+}
+
+interface PaySystem {
+  name: string;
+  shm_url: string;
+  internal?: number;
+  recurring?: number;
+  weight?: number;
+}
 
 interface ServiceInfo {
   category: string;
@@ -71,6 +88,15 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
   const [confirmStop, setConfirmStop] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const { t, i18n } = useTranslation();
+  const { copied: urlCopied, copy: copyUrl } = useCopyToClipboard();
+
+  const [forecastTotal, setForecastTotal] = useState<number | null>(null);
+  const [forecastLoading, setForecastLoading] = useState(false);
+  const [paySystems, setPaySystems] = useState<PaySystem[]>([]);
+  const [selectedPaySystem, setSelectedPaySystem] = useState<string | null>(null);
+  const [payAmount, setPayAmount] = useState<number | string>(0);
+  const [paySystemsLoading, setPaySystemsLoading] = useState(false);
+  const [paying, setPaying] = useState(false);
 
   const downloadConfig = async () => {
     if (!storageData) return;
@@ -93,6 +119,87 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
   const canDelete = ['BLOCK', 'NOT PAID', 'ERROR'].includes(service.status);
   const canStop = service.status === 'ACTIVE';
   const canChange = ['BLOCK', 'ACTIVE'].includes(service.status);
+  const isNotPaid = service.status === 'NOT PAID';
+
+  useEffect(() => {
+    if (!isNotPaid) return;
+    const fetchForecast = async () => {
+      setForecastLoading(true);
+      try {
+        const response = await userApi.getForecast();
+        const forecastData = response.data.data;
+        if (Array.isArray(forecastData) && forecastData.length > 0) {
+          const forecast = forecastData[0];
+          const balance = forecast.balance || 0;
+          const item = forecast.items?.find(
+            (it: ForecastItem) => String(it.user_service_id) === String(service.user_service_id)
+          );
+          if (item) {
+            const needToPay = Math.max(0, Math.ceil((item.total - balance) * 100) / 100);
+            setForecastTotal(needToPay);
+            setPayAmount(needToPay);
+          } else if (forecast.total > 0) {
+            setForecastTotal(forecast.total);
+            setPayAmount(Math.max(0, Math.ceil(forecast.total * 100) / 100));
+          }
+        }
+      } catch {
+      } finally {
+        setForecastLoading(false);
+      }
+    };
+    fetchForecast();
+  }, [service.user_service_id, isNotPaid]);
+
+  const loadPaySystems = async () => {
+    if (paySystems.length > 0) return;
+    setPaySystemsLoading(true);
+    try {
+      const response = await userApi.getPaySystems();
+      const data: PaySystem[] = response.data.data || [];
+      const sorted = data.sort((a, b) => (b.weight || 0) - (a.weight || 0));
+      setPaySystems(sorted);
+      if (sorted.length > 0) {
+        setSelectedPaySystem(sorted[0].shm_url);
+      }
+    } catch {
+    } finally {
+      setPaySystemsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isNotPaid && forecastTotal !== null && forecastTotal > 0) {
+      loadPaySystems();
+    }
+  }, [isNotPaid, forecastTotal]);
+
+  const handlePay = async () => {
+    const paySystem = paySystems.find(ps => ps.shm_url === selectedPaySystem);
+    if (!paySystem) return;
+    setPaying(true);
+    try {
+      if (paySystem.internal || paySystem.recurring) {
+        const response = await fetch(paySystem.shm_url + payAmount, {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (response.status === 200 || response.status === 204) {
+          notifications.show({ title: t('common.success'), message: t('payments.paymentSuccess'), color: 'green' });
+          onDelete?.();
+        } else {
+          const data = await response.json().catch(() => ({}));
+          notifications.show({ title: t('common.error'), message: data.msg_ru || data.msg || t('payments.paymentError'), color: 'red' });
+        }
+      } else {
+        window.open(paySystem.shm_url + payAmount, '_blank');
+      }
+    } catch {
+      notifications.show({ title: t('common.error'), message: t('payments.paymentError'), color: 'red' });
+    } finally {
+      setPaying(false);
+    }
+  };
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -279,15 +386,11 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
                   <Text size="sm" fw={500} mb="xs">{t('services.subscriptionLink')}</Text>
                   <Group gap="xs">
                     <Code style={{ flex: 1, wordBreak: 'break-all' }}>{subscriptionUrl}</Code>
-                    <CopyButton value={subscriptionUrl}>
-                      {({ copied, copy }) => (
-                        <Tooltip label={copied ? t('common.copied') : t('common.copy')}>
-                          <ActionIcon color={copied ? 'teal' : 'gray'} variant="subtle" onClick={copy}>
-                            {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                          </ActionIcon>
-                        </Tooltip>
-                      )}
-                    </CopyButton>
+                    <Tooltip label={urlCopied ? t('common.copied') : t('common.copy')}>
+                      <ActionIcon color={urlCopied ? 'teal' : 'gray'} variant="subtle" onClick={() => copyUrl(subscriptionUrl)}>
+                        {urlCopied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+                      </ActionIcon>
+                    </Tooltip>
                   </Group>
                 </Paper>
               )}
@@ -326,6 +429,63 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
           </Tabs.Panel>
         )}
       </Tabs>
+
+      {isNotPaid && (
+        <Paper withBorder p="md" radius="md" mt="md">
+          <Stack gap="sm">
+            {forecastLoading ? (
+              <Group justify="center" py="xs">
+                <Loader size="sm" />
+                <Text size="sm">{t('common.loading')}</Text>
+              </Group>
+            ) : forecastTotal !== null && forecastTotal > 0 ? (
+              <>
+                <Group justify="space-between">
+                  <Group gap="xs">
+                    <IconWallet size={18} />
+                    <Text fw={500}>{t('services.amountToPay')}</Text>
+                  </Group>
+                  <Text fw={700} size="lg" c="red">{forecastTotal.toFixed(2)} {t('common.currency')}</Text>
+                </Group>
+                {paySystemsLoading ? (
+                  <Group justify="center" py="xs">
+                    <Loader size="sm" />
+                  </Group>
+                ) : paySystems.length > 0 ? (
+                  <>
+                    <Select
+                      label={t('payments.paymentSystem')}
+                      data={paySystems.map(ps => ({ value: ps.shm_url, label: ps.name }))}
+                      value={selectedPaySystem}
+                      onChange={setSelectedPaySystem}
+                      size="sm"
+                    />
+                    <NumberInput
+                      label={t('payments.amount')}
+                      value={payAmount}
+                      onChange={setPayAmount}
+                      min={1}
+                      step={10}
+                      decimalScale={2}
+                      suffix=" ₽"
+                      size="sm"
+                    />
+                    <Button
+                      fullWidth
+                      leftSection={<IconCreditCard size={18} />}
+                      onClick={handlePay}
+                      loading={paying}
+                      disabled={!selectedPaySystem}
+                    >
+                      {t('services.payService', { amount: payAmount })}
+                    </Button>
+                  </>
+                ) : null}
+              </>
+            ) : null}
+          </Stack>
+        </Paper>
+      )}
 
       {canChange && (
         <Button
@@ -496,12 +656,14 @@ export default function Services() {
   const [changeModalOpened, { open: openChangeModal, close: closeChangeModal }] = useDisclosure(false);
   const [changeService, setChangeService] = useState<UserService | null>(null);
   const refreshAttemptsRef = useRef(0);
+  const [categoryPages, setCategoryPages] = useState<Record<string, number>>({});
+  const perPage = 5;
   const { t } = useTranslation();
 
   const fetchServices = async (background = false) => {
     if (!background) setLoading(true);
     try {
-      const response = await api.get('/user/service');
+      const response = await api.get('/user/service', { params: { limit: 1000 } });
       const data: UserService[] = response.data.data || [];
 
       const serviceMap = new Map<number, UserService>();
@@ -635,7 +797,11 @@ export default function Services() {
         </Paper>
       ) : (
         <Accordion variant="separated" radius="md" multiple defaultValue={Object.keys(groupedServices)}>
-          {Object.entries(groupedServices).map(([category, categoryServices]) => (
+          {Object.entries(groupedServices).map(([category, categoryServices]) => {
+            const page = categoryPages[category] || 1;
+            const totalPages = Math.ceil(categoryServices.length / perPage);
+            const paginatedServices = categoryServices.slice((page - 1) * perPage, page * perPage);
+            return (
             <Accordion.Item key={category} value={category}>
               <Accordion.Control>
                 <Group>
@@ -645,7 +811,7 @@ export default function Services() {
               </Accordion.Control>
               <Accordion.Panel>
                 <Stack gap="sm">
-                  {categoryServices.map((service) => (
+                  {paginatedServices.map((service) => (
                     <Box key={service.user_service_id}>
                       <ServiceCard
                         service={service}
@@ -666,10 +832,21 @@ export default function Services() {
                       )}
                     </Box>
                   ))}
+                  {totalPages > 1 && (
+                    <Center mt="xs">
+                      <Pagination
+                        total={totalPages}
+                        value={page}
+                        onChange={(p) => setCategoryPages(prev => ({ ...prev, [category]: p }))}
+                        size="sm"
+                      />
+                    </Center>
+                  )}
                 </Stack>
               </Accordion.Panel>
             </Accordion.Item>
-          ))}
+            );
+          })}
         </Accordion>
       )}
 

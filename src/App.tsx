@@ -63,7 +63,7 @@ function ThemeToggle() {
 
 function WebAppHeader() {
   const navigate = useNavigate();
-  const { logout } = useStore();
+  const { logout, user } = useStore();
   const computedColorScheme = useComputedColorScheme('light');
   const { setColorScheme } = useMantineColorScheme();
 
@@ -89,6 +89,7 @@ function WebAppHeader() {
 
   return (
     <Group justify="flex-end" p="sm" gap="xs">
+     <Text size="sm" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>{user?.login}</Text>
      { config.SUPPORT_LINK &&  <ActionIcon
         onClick={handleSupportLink}
         variant="subtle"
@@ -134,7 +135,7 @@ function BottomNavigation() {
         left: 16,
         right: 16,
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        zIndex: 1000,
+        zIndex: 100,
       }}
     >
       <Box

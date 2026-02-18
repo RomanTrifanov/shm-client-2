@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Card, Text, Stack, Group, Button, TextInput, Badge, Loader, Box, Modal, Code, CopyButton, ActionIcon, SimpleGrid } from '@mantine/core';
+import { Card, Text, Stack, Group, Button, TextInput, Badge, Loader, Box, Modal, Code, ActionIcon, SimpleGrid } from '@mantine/core';
 import { IconShieldLock, IconCheck, IconCopy, IconQrcode } from '@tabler/icons-react';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
 import { otpApi, OtpStatus, OtpSetupResponse } from '../api/client';
@@ -23,6 +24,8 @@ export default function OtpSettings({ embedded = false }: OtpSettingsProps) {
   const [enabling, setEnabling] = useState(false);
   const [disabling, setDisabling] = useState(false);
   const [showBackupCodes, setShowBackupCodes] = useState(false);
+  const { copied: secretCopied, copy: copySecret } = useCopyToClipboard();
+  const { copied: backupCopied, copy: copyBackup } = useCopyToClipboard();
 
   const loadStatus = async () => {
     try {
@@ -233,17 +236,13 @@ export default function OtpSettings({ embedded = false }: OtpSettingsProps) {
               <Code style={{ fontSize: '14px', padding: '8px 12px' }}>
                 {setupData.secret}
               </Code>
-              <CopyButton value={setupData.secret}>
-                {({ copied, copy }) => (
-                  <ActionIcon
-                    color={copied ? 'green' : 'gray'}
-                    variant="subtle"
-                    onClick={copy}
-                  >
-                    {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                  </ActionIcon>
-                )}
-              </CopyButton>
+              <ActionIcon
+                color={secretCopied ? 'green' : 'gray'}
+                variant="subtle"
+                onClick={() => copySecret(setupData.secret)}
+              >
+                {secretCopied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+              </ActionIcon>
             </Group>
 
             <TextInput
@@ -283,18 +282,14 @@ export default function OtpSettings({ embedded = false }: OtpSettingsProps) {
               </SimpleGrid>
             </Card>
 
-            <CopyButton value={setupData.backup_codes.join('\n')}>
-              {({ copied, copy }) => (
-                <Button
-                  variant="light"
-                  color={copied ? 'green' : 'gray'}
-                  leftSection={copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                  onClick={copy}
-                >
-                  {copied ? t('common.copied') : t('otp.copyBackupCodes')}
-                </Button>
-              )}
-            </CopyButton>
+            <Button
+              variant="light"
+              color={backupCopied ? 'green' : 'gray'}
+              leftSection={backupCopied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+              onClick={() => copyBackup(setupData.backup_codes.join('\n'))}
+            >
+              {backupCopied ? t('common.copied') : t('otp.copyBackupCodes')}
+            </Button>
 
             <Text size="xs" c="red">
               {t('otp.backupCodesWarning')}

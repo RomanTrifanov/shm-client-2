@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, Stack, Loader, Center, Paper, Title, Table, Pagination, Badge } from '@mantine/core';
+import { Text, Stack, Loader, Center, Paper, Title, Table, Pagination, Badge, LoadingOverlay } from '@mantine/core';
 import { api } from '../api/client';
 
 interface Withdraw {
@@ -21,28 +21,43 @@ interface Withdraw {
 export default function Withdrawals() {
   const { t, i18n } = useTranslation();
   const [withdrawals, setWithdrawals] = useState<Withdraw[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const perPage = 10;
 
-  useEffect(() => {
-    const fetchWithdrawals = async () => {
-      try {
-        const response = await api.get('/user/withdraw');
-        setWithdrawals(response.data.data || []);
-      } catch (error) {
-        console.error('Failed to fetch withdrawals:', error);
-      } finally {
-        setLoading(false);
+  const fetchWithdrawals = async (p: number, isInitial = false) => {
+    if (isInitial) setInitialLoading(true);
+    else setTableLoading(true);
+    try {
+      const offset = (p - 1) * perPage;
+      const response = await api.get('/user/withdraw', { params: { limit: perPage, offset } });
+      setWithdrawals(response.data.data || []);
+      if (typeof response.data.items === 'number') {
+        setTotalItems(response.data.items);
       }
-    };
-    fetchWithdrawals();
+    } catch (error) {
+      console.error('Failed to fetch withdrawals:', error);
+    } finally {
+      setInitialLoading(false);
+      setTableLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWithdrawals(1, true);
   }, []);
 
-  const paginatedWithdrawals = withdrawals.slice((page - 1) * perPage, page * perPage);
-  const totalPages = Math.ceil(withdrawals.length / perPage);
+  useEffect(() => {
+    if (!initialLoading) {
+      fetchWithdrawals(page);
+    }
+  }, [page]);
 
-  if (loading) {
+  const totalPages = Math.ceil(totalItems / perPage);
+
+  if (initialLoading) {
     return (
       <Center h={300}>
         <Loader size="lg" />
@@ -62,7 +77,8 @@ export default function Withdrawals() {
         </Paper>
       ) : (
         <>
-          <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
+          <Paper withBorder radius="md" style={{ overflow: 'hidden', position: 'relative' }}>
+            <LoadingOverlay visible={tableLoading} overlayProps={{ blur: 1 }} />
             <Table.ScrollContainer minWidth={600}>
               <Table striped highlightOnHover>
                 <Table.Thead>
@@ -78,7 +94,7 @@ export default function Withdrawals() {
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {paginatedWithdrawals.map((w) => (
+                  {withdrawals.map((w) => (
                     <Table.Tr key={w.withdraw_id}>
                       <Table.Td>
                         <Text size="sm">{w.withdraw_id}</Text>
