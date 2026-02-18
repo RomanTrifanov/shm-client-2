@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Text, Stack, Group, Button, TextInput, ActionIcon, Badge, Loader, Box, Modal } from '@mantine/core';
+import { Card, Text, Stack, Group, Button, TextInput, ActionIcon, Loader, Box, Modal } from '@mantine/core';
 import { IconFingerprint, IconTrash, IconEdit, IconPlus, IconDeviceMobile } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
@@ -43,6 +43,7 @@ export default function PasskeySettings({ embedded = false }: PasskeySettingsPro
   const [credentialToRename, setCredentialToRename] = useState<PasskeyCredential | null>(null);
   const [newName, setNewName] = useState('');
   const [renaming, setRenaming] = useState(false);
+  const [manageModalOpen, setManageModalOpen] = useState(false);
   const isWebAuthnSupported = !!window.PublicKeyCredential;
 
   const loadCredentials = async () => {
@@ -274,17 +275,12 @@ export default function PasskeySettings({ embedded = false }: PasskeySettingsPro
     );
   }
 
-  const mainContent = (
+  const fullManagementContent = (
     <>
-      <Group justify="space-between" mb={embedded ? "xs" : "md"}>
+      <Group justify="space-between" mb="md">
         <Group gap="xs">
-          <IconFingerprint size={embedded ? 18 : 24} />
+          <IconFingerprint size={18} />
           <Text fw={500}>{t('passkey.title')}</Text>
-          {credentials.length > 0 && (
-            <Badge color="green" variant="light" size="sm">
-              {t('passkey.enabled')}
-            </Badge>
-          )}
         </Group>
         <Button
           variant="light"
@@ -352,13 +348,45 @@ export default function PasskeySettings({ embedded = false }: PasskeySettingsPro
     </>
   );
 
+  const summaryContent = (
+    <Stack gap="xs">
+      <Group justify="space-between">
+        <Group gap="xs">
+          <IconFingerprint size={18} />
+          <Text fw={500}>{t('passkey.title')}</Text>
+        </Group>
+        <Button
+          variant="light"
+          size="xs"
+          onClick={() => setManageModalOpen(true)}
+        >
+          {t('passkey.manage')}
+        </Button>
+      </Group>
+      <Text size="sm" c="dimmed">
+        {credentials.length === 0
+          ? t('passkey.noPasskeys')
+          : t('passkey.devicesCount', { count: credentials.length })}
+      </Text>
+    </Stack>
+  );
+
   return (
     <>
       {embedded ? (
-        <Stack gap="xs">{mainContent}</Stack>
+        summaryContent
       ) : (
-        <Card withBorder radius="md" p="lg">{mainContent}</Card>
+        <Card withBorder radius="md" p="lg">{fullManagementContent}</Card>
       )}
+
+      <Modal
+        opened={manageModalOpen}
+        onClose={() => setManageModalOpen(false)}
+        title={t('passkey.title')}
+        size="md"
+      >
+        {fullManagementContent}
+      </Modal>
 
       <ConfirmModal
         opened={deleteModalOpen}

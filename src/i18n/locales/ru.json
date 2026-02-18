@@ -261,7 +261,6 @@
   "passkey": {
     "title": "Авторизация через Passkey",
     "description": "Passkey позволяет входить в аккаунт с помощью отпечатка пальца, Face ID или PIN-кода устройства",
-    "enabled": "Включено",
     "add": "Добавить",
     "noPasskeys": "У вас нет зарегистрированных Passkey",
     "createdAt": "Добавлен",
@@ -279,6 +278,8 @@
     "alreadyRegistered": "Passkey уже зарегистрирован. Удалите его из настроек паролей вашего устройства",
     "cancelled": "Регистрация отменена",
     "notSupported": "Ваш браузер не поддерживает Passkey",
+    "manage": "Управление",
+    "devicesCount": "Устройств: {{count}}",
     "notConfigured": "Passkey не настроен для этого аккаунта",
     "loginWithPasskey": "Войти с Passkey",
     "enterLogin": "Введите логин",

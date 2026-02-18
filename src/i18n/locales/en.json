@@ -261,7 +261,6 @@
   "passkey": {
     "title": "Authorization via Passkey",
     "description": "Passkey allows you to sign in using fingerprint, Face ID, or device PIN",
-    "enabled": "Enabled",
     "add": "Add",
     "noPasskeys": "You don't have any registered Passkeys",
     "createdAt": "Added",
@@ -279,6 +278,8 @@
     "alreadyRegistered": "Passkey already registered. Delete it from your device password settings",
     "cancelled": "Registration cancelled",
     "notSupported": "Your browser does not support Passkey",
+    "manage": "Manage",
+    "devicesCount": "Devices: {{count}}",
     "notConfigured": "Passkey is not configured for this account",
     "loginWithPasskey": "Sign in with Passkey",
     "enterLogin": "Enter your login",
