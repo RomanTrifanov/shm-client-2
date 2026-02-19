@@ -59,15 +59,17 @@ export default function SecuritySettings() {
 
         <Stack gap="lg">
 
-          {otpEnabled && <OtpSettings embedded />}
+          {otpEnabled &&
+            <>
+              <OtpSettings embedded />
+
+              <Divider />
+            </>
+          }
 
           {hasTelegramWidget && passkeyEnabled && (
             <>
-              {otpEnabled && <Divider />}
-
               <PasskeySettings embedded />
-
-              <Divider />
 
               <PasswordAuthSettings embedded />
             </>
