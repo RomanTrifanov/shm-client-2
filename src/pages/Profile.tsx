@@ -52,7 +52,7 @@ export default function Profile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [formData, setFormData] = useState({ full_name: '', phone: '', email: '', email_verified: 0  });
+  const [formData, setFormData] = useState({ full_name: '', phone: '' });
   const [telegramUsername, setTelegramUsername] = useState<string | null>(null);
   const [payModalOpen, setPayModalOpen] = useState(false);
   const [promoModalOpen, setPromoModalOpen] = useState(false);
@@ -63,7 +63,7 @@ export default function Profile() {
   const [emailInput, setEmailInput] = useState('');
   const [emailSaving, setEmailSaving] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [emailVerified, setEmailVerified] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(0);
   const [verifyModalOpen, setVerifyModalOpen] = useState(false);
   const [verifyCode, setVerifyCode] = useState('');
   const [verifySending, setVerifySending] = useState(false);
@@ -100,11 +100,11 @@ export default function Profile() {
         const responseData = response.data.data;
         const data = Array.isArray(responseData) ? responseData[0] : responseData;
         setProfile(data);
+        setUserEmail(data.email || null);
+        setEmailVerified(data.email_verified || 0 );
         setFormData({
           full_name: data.full_name || '',
-          phone: data.phone || '',
-          email: data.email || '',
-          email_verified: data.email_verified || 0,
+          phone: data.phone || ''
         });
         try {
           const telegramResponse = await telegramApi.getSettings();
@@ -150,6 +150,8 @@ export default function Profile() {
     const profileData = profileResponse.data.data;
     const data = Array.isArray(profileData) ? profileData[0] : profileData;
     setProfile(data);
+    setUserEmail(data.email || null);
+    setEmailVerified(data.email_verified || 0 );
   };
 
   const openTelegramModal = () => {
@@ -231,7 +233,7 @@ export default function Profile() {
         message: t('profile.emailSaved'),
         color: 'green',
       });
-      setEmailVerified(false);
+      setEmailVerified(0);
     } catch {
       notifications.show({
         title: t('common.error'),
@@ -299,7 +301,7 @@ export default function Profile() {
         return;
       }
 
-      setEmailVerified(true);
+      setEmailVerified(1);
       setVerifyModalOpen(false);
       notifications.show({
         title: t('common.success'),
