@@ -11,6 +11,9 @@ interface OrderService {
   name: string;
   category: string;
   cost: number;
+  real_cost?: number;
+  cost_discount?: number;
+  discount?: number;
   period: number;
   descr: string;
 }
@@ -62,6 +65,7 @@ export default function OrderServiceModal({
   const [selectedService, setSelectedService] = useState<OrderService | null>(null);
   const [ordering, setOrdering] = useState(false);
   const [userBalance, setUserBalance] = useState<number>(0);
+  // const [userBonus, setUserBonus] = useState<number>(0);
   const [paySystems, setPaySystems] = useState<PaySystem[]>([]);
   const [selectedPaySystem, setSelectedPaySystem] = useState<string | null>(null);
   const [payAmount, setPayAmount] = useState<number | string>(0);
@@ -90,9 +94,10 @@ export default function OrderServiceModal({
 
   useEffect(() => {
     if (selectedService && !isChangeMode) {
-      const needToPay = Math.max(0, Math.ceil((selectedService.cost - userBalance) * 100) / 100);
+      const cost = selectedService.real_cost || selectedService.cost;
+      const needToPay = Math.max(0, Math.ceil((cost - userBalance) * 100) / 100);
       setPayAmount(needToPay);
-      if (userBalance < selectedService.cost && !paySystemsLoaded) {
+      if (userBalance < cost && !paySystemsLoaded) {
         loadPaySystems();
       }
     }
@@ -109,6 +114,7 @@ export default function OrderServiceModal({
       const response = await userApi.getProfile();
       const userData = response.data.data?.[0] || response.data.data;
       setUserBalance(userData?.balance || 0);
+      // setUserBonus(userData?.bonus || 0);
     } catch {
     }
   };
@@ -325,7 +331,26 @@ export default function OrderServiceModal({
               <Group justify="space-between" mt="md">
                 <div>
                   <Text size="sm" c="dimmed">{t('services.cost')}</Text>
-                  <Text fw={600} size="lg">{selectedService.cost} ₽</Text>
+                  <Group gap="xs" align="baseline">
+                    {selectedService.discount && selectedService.discount > 0 ? (
+                      <>
+                        <Text fw={600} size="lg" style={{ textDecoration: 'line-through', color: '#999' }}>
+                          {selectedService.cost} ₽
+                        </Text>
+                        <Badge color="green" variant="light" size="sm">
+                          -{selectedService.discount}%
+                        </Badge>
+                      </>
+                    ) : null}
+                    <Text fw={600} size="lg" color={selectedService.discount && selectedService.discount > 0 ? 'green' : undefined}>
+                      {selectedService.real_cost || selectedService.cost} ₽
+                    </Text>
+                  </Group>
+                  {selectedService.cost_discount && selectedService.cost_discount > 0 && (
+                    <Text size="xs" c="dimmed" mt="xs">
+                      {t('services.savings', { amount: selectedService.cost_discount })}
+                    </Text>
+                  )}
                 </div>
                 <div>
                   <Text size="sm" c="dimmed">{t('order.period')}</Text>
@@ -365,12 +390,12 @@ export default function OrderServiceModal({
             <>
               <Alert
                 variant="light"
-                color={userBalance >= selectedService.cost ? 'green' : 'yellow'}
+                color={userBalance >= (selectedService.real_cost || selectedService.cost) ? 'green' : 'yellow'}
                 icon={<IconWallet size={18} />}
               >
                 <Group justify="space-between">
                   <Text size="sm">{t('order.yourBalance')}: <Text span fw={600}>{userBalance} ₽</Text></Text>
-                  {userBalance >= selectedService.cost ? (
+                  {userBalance >= (selectedService.real_cost || selectedService.cost) ? (
                     <Badge color="green" variant="light">{t('order.enoughToPay')}</Badge>
                   ) : (
                     <Badge color="yellow" variant="light">{t('order.needTopUp', { amount: Math.ceil((selectedService.cost - userBalance) * 100) / 100 })}</Badge>
@@ -378,7 +403,7 @@ export default function OrderServiceModal({
                 </Group>
               </Alert>
 
-              {userBalance >= selectedService.cost ? (
+              {userBalance >= (selectedService.real_cost || selectedService.cost) ? (
                 <Button
                   fullWidth
                   size="md"
@@ -387,7 +412,7 @@ export default function OrderServiceModal({
                   onClick={handleOrder}
                   loading={ordering}
                 >
-                  {t('order.orderFor', { amount: selectedService.cost })}
+                  {t('order.orderFor', { amount: selectedService.real_cost || selectedService.cost })}
                 </Button>
               ) : (
                 <>
@@ -416,11 +441,11 @@ export default function OrderServiceModal({
                             placeholder={t('payments.enterAmount')}
                             value={payAmount}
                             onChange={setPayAmount}
-                            min={Math.ceil((selectedService.cost - userBalance) * 100) / 100}
+                            min={Math.ceil(( selectedService.real_cost || selectedService.cost - userBalance) * 100) / 100}
                             step={10}
                             decimalScale={2}
                             suffix=" ₽"
-                            description={`${t('order.minimum')}: ${(Math.ceil((selectedService.cost - userBalance) * 100) / 100).toFixed(2)} ₽ (${t('order.missingAmount')})`}
+                            description={`${t('order.minimum')}: ${(Math.ceil((selectedService.real_cost || selectedService.cost - userBalance) * 100) / 100).toFixed(2)} ₽ (${t('order.missingAmount')})`}
                           />
                         </>
                       )}
@@ -472,8 +497,20 @@ export default function OrderServiceModal({
                           </Text>
                         )}
                       </div>
-                      <Group gap="sm">
-                        <Text fw={600}>{service.cost} ₽</Text>
+                      <Group gap="sm" align="baseline">
+                        {service.discount && service.discount > 0 ? (
+                          <>
+                            <Text size="sm" c="dimmed" style={{ textDecoration: 'line-through' }}>
+                              {service.cost} ₽
+                            </Text>
+                            <Badge color="green" variant="light" size="xs">
+                              -{service.discount}%
+                            </Badge>
+                          </>
+                        ) : null}
+                        <Text fw={600} color={service.discount && service.discount > 0 ? 'green' : undefined}>
+                          {service.real_cost || service.cost} ₽
+                        </Text>
                         <Text size="xs" c="dimmed">
                           / {service.period === 1 ? t('common.month') :
                              service.period === 3 ? t('common.months3') :

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Card, Text, Stack, Group, Button, Modal, Divider, PasswordInput } from '@mantine/core';
-import { IconShieldLock, IconLock } from '@tabler/icons-react';
+import { Card, Text, Stack, Group, Button, Modal, Space, PasswordInput, Tabs } from '@mantine/core';
+import { IconShieldLock, IconLock, IconShield, IconFingerprint, IconKey } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { useMediaQuery } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 import { userApi } from '../../api/client';
 import PasskeySettings from './PasskeySettings';
@@ -18,6 +19,7 @@ export default function SecuritySettings() {
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const { isInsideTelegramWebApp } = useTelegramWebApp();
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const handleChangePassword = async () => {
     if (!newPassword) {
@@ -57,45 +59,71 @@ export default function SecuritySettings() {
           <Text fw={600} size="lg">{t('profile.security')}</Text>
         </Group>
 
-        <Stack gap="lg">
+        <Tabs defaultValue={'password'} variant="outline" >
+          <Tabs.List grow>
+            <Tabs.Tab value="password" leftSection={<IconLock size={14} />}>
+              {isMobile ? undefined : t('profile.changePassword')}
+            </Tabs.Tab>
+            {otpEnabled && (
+              <Tabs.Tab value="otp" leftSection={<IconShield size={14} />}>
+                {isMobile ? undefined : t('otp.title')}
+              </Tabs.Tab>
+            )}
+            {passkeyEnabled && hasTelegramWidget && (
+              <Tabs.Tab value="passkey" leftSection={<IconFingerprint size={14} />}>
+                {isMobile ? undefined : t('passkey.title')}
+              </Tabs.Tab>
+            )}
+            {hasTelegramWidget && (
+              <Tabs.Tab value="passwordAuth" leftSection={<IconKey size={14} />}>
+                {isMobile ? undefined : t('passwordAuth.title')}
+              </Tabs.Tab>
+            )}
+          </Tabs.List>
 
-          {otpEnabled &&
-            <>
+          <Space h="xl" />
+
+          {otpEnabled && (
+            <Tabs.Panel value="otp">
               <OtpSettings embedded />
-
-              <Divider />
-            </>
-          }
-
-          {hasTelegramWidget && passkeyEnabled && (
-            <>
-              <PasskeySettings embedded />
-
-              <Divider />
-
-              <PasswordAuthSettings embedded />
-            </>
+            </Tabs.Panel>
           )}
 
-          <Stack gap="xs">
-            <Group gap="xs">
-              <IconLock size={18} />
-              <Text fw={500}>{t('profile.changePassword')}</Text>
-            </Group>
-            <Text size="sm" c="dimmed">
-              {t('security.changePasswordDescription')}
-            </Text>
-            <Button
-              variant="light"
-              leftSection={<IconLock size={16} />}
-              onClick={() => setPasswordModalOpen(true)}
-              mt="xs"
-            >
-              {t('profile.changePassword')}
-            </Button>
-          </Stack>
-        </Stack>
+          {passkeyEnabled && hasTelegramWidget && (
+            <Tabs.Panel value="passkey">
+              <PasskeySettings embedded />
+            </Tabs.Panel>
+          )}
+
+          {hasTelegramWidget && (
+            <Tabs.Panel value="passwordAuth">
+              <PasswordAuthSettings embedded />
+            </Tabs.Panel>
+          )}
+
+          <Tabs.Panel value="password">
+            <Stack gap="xs">
+              <Group gap="xs">
+                <IconLock size={18} />
+                <Text fw={500}>{t('profile.changePassword')}</Text>
+              </Group>
+              <Text size="sm" c="dimmed">
+                {t('security.changePasswordDescription')}
+              </Text>
+              <Button
+                variant="light"
+                leftSection={<IconLock size={16} />}
+                onClick={() => setPasswordModalOpen(true)}
+                mt="xs"
+              >
+                {t('profile.changePassword')}
+              </Button>
+            </Stack>
+          </Tabs.Panel>
+        </Tabs>
       </Card>
+
+      <Space h="xl" />
 
       <Modal
         opened={passwordModalOpen}

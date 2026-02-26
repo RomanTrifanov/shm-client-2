@@ -4,13 +4,16 @@ import { removeCookie } from '../api/cookie';
 interface User {
   user_id: number;
   login: string;
-  gid?: number;
   full_name?: string;
   phone?: string;
-  balance?: number;
-  bonus?: number;
-  credit?: number;
-  discount?: number;
+  email?: string;
+  email_verified?: number;
+  balance: number;
+  credit: number;
+  discount: number;
+  bonus: number;
+  gid: number;
+  telegram_user_id?: number;
 }
 
 interface AppState {

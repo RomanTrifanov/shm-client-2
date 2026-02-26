@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Text, Stack, Group, Button, Badge, Alert, Divider } from '@mantine/core';
+import { Card, Text, Stack, Group, Button, Badge, Alert } from '@mantine/core';
 import { IconLock, IconLockOpen, IconAlertCircle } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
@@ -135,10 +135,7 @@ export default function PasswordAuthSettings({ embedded = false }: PasswordAuthS
   return (
     <>
       {embedded ? (
-        <>
-          <Divider />
-          {mainContent}
-        </>
+        mainContent
       ) : (
         <Card withBorder radius="md" p="lg">
           {mainContent}

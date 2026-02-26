@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, Text, Stack, Group, Button, TextInput, Badge, Loader, Box, Modal, Code, ActionIcon, SimpleGrid } from '@mantine/core';
 import { IconShieldLock, IconCheck, IconCopy, IconQrcode } from '@tabler/icons-react';
-import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
+import { useClipboard } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
 import { otpApi, OtpStatus, OtpSetupResponse } from '../../api/client';
@@ -25,8 +25,7 @@ export default function OtpSettings({ embedded = false }: OtpSettingsProps) {
   const [enabling, setEnabling] = useState(false);
   const [disabling, setDisabling] = useState(false);
   const [showBackupCodes, setShowBackupCodes] = useState(false);
-  const { copied: secretCopied, copy: copySecret } = useCopyToClipboard();
-  const { copied: backupCopied, copy: copyBackup } = useCopyToClipboard();
+  const clipboard = useClipboard({ timeout: 1000 });
 
   const loadStatus = async () => {
     try {
@@ -219,13 +218,9 @@ export default function OtpSettings({ embedded = false }: OtpSettingsProps) {
               style={{
                 display: 'flex',
                 justifyContent: 'center',
-                padding: '16px',
-                backgroundColor: 'white',
-                borderRadius: '8px',
               }}
             >
               <Button
-                variant="light"
                 leftSection={<IconQrcode size={18} />}
                 onClick={() => setQrModalOpen(true)}
               >
@@ -242,11 +237,11 @@ export default function OtpSettings({ embedded = false }: OtpSettingsProps) {
                 {setupData.secret}
               </Code>
               <ActionIcon
-                color={secretCopied ? 'green' : 'gray'}
+                color={clipboard.copied ? 'green' : 'gray'}
                 variant="subtle"
-                onClick={() => copySecret(setupData.secret)}
+                onClick={() => clipboard.copy(setupData.secret)}
               >
-                {secretCopied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+                {clipboard.copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
               </ActionIcon>
             </Group>
 
@@ -289,11 +284,11 @@ export default function OtpSettings({ embedded = false }: OtpSettingsProps) {
 
             <Button
               variant="light"
-              color={backupCopied ? 'green' : 'gray'}
-              leftSection={backupCopied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-              onClick={() => copyBackup(setupData.backup_codes.join('\n'))}
+              color={clipboard.copied ? 'green' : 'gray'}
+              leftSection={clipboard.copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+              onClick={() => clipboard.copy(setupData.backup_codes.join('\n'))}
             >
-              {backupCopied ? t('common.copied') : t('otp.copyBackupCodes')}
+              {clipboard.copied ? t('common.copied') : t('otp.copyBackupCodes')}
             </Button>
 
             <Text size="xs" c="red">

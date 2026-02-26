@@ -1,19 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, Text, Stack, Group, Badge, Button, Modal, ActionIcon, Loader, Center, Paper, Title, Tabs, Code, Tooltip, Accordion, Box, Select, NumberInput, Pagination } from '@mantine/core';
 import { IconQrcode, IconCopy, IconCheck, IconDownload, IconRefresh, IconTrash, IconPlus, IconPlayerStop, IconExchange, IconCreditCard, IconWallet } from '@tabler/icons-react';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useClipboard } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 import { api, servicesApi, userApi } from '../api/client';
 import { notifications } from '@mantine/notifications';
 import QrModal from '../components/QrModal';
 import OrderServiceModal from '../components/OrderServiceModal';
 import ConfirmModal from '../components/ConfirmModal';
-import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import { config } from '../config';
 
 interface ForecastItem {
   name: string;
   cost: number;
+  real_cost?: number;
   total: number;
   status: string;
   user_service_id: string;
@@ -95,7 +95,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
   const [confirmStop, setConfirmStop] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const { t, i18n } = useTranslation();
-  const { copied: urlCopied, copy: copyUrl } = useCopyToClipboard();
+  const clipboard = useClipboard({ timeout: 1000 });
 
   const [forecastTotal, setForecastTotal] = useState<number | null>(null);
   const [forecastLoading, setForecastLoading] = useState(false);
@@ -398,9 +398,9 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
                   <Text size="sm" fw={500} mb="xs">{t('services.subscriptionLink')}</Text>
                   <Group gap="xs">
                     <Code style={{ flex: 1, wordBreak: 'break-all' }}>{subscriptionUrl}</Code>
-                    <Tooltip label={urlCopied ? t('common.copied') : t('common.copy')}>
-                      <ActionIcon color={urlCopied ? 'teal' : 'gray'} variant="subtle" onClick={() => copyUrl(subscriptionUrl)}>
-                        {urlCopied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+                    <Tooltip label={clipboard.copied ? t('common.copied') : t('common.copy')}>
+                      <ActionIcon color={clipboard.copied ? 'teal' : 'gray'} variant="subtle" onClick={() => clipboard.copy(subscriptionUrl)}>
+                        {clipboard.copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
                       </ActionIcon>
                     </Tooltip>
                   </Group>

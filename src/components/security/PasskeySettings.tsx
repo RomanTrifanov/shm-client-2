@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Text, Stack, Group, Button, TextInput, ActionIcon, Loader, Box, Modal } from '@mantine/core';
+import { Card, Text, Stack, Group, Button, TextInput, ActionIcon, Loader, Box, Drawer, Modal } from '@mantine/core';
 import { IconFingerprint, IconTrash, IconEdit, IconPlus, IconDeviceMobile } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
@@ -379,14 +379,16 @@ export default function PasskeySettings({ embedded = false }: PasskeySettingsPro
         <Card withBorder radius="md" p="lg">{fullManagementContent}</Card>
       )}
 
-      <Modal
+      <Drawer
         opened={manageModalOpen}
         onClose={() => setManageModalOpen(false)}
         title={t('passkey.title')}
         size="md"
+        offset={8}
+        radius="md"
       >
         {fullManagementContent}
-      </Modal>
+      </Drawer>
 
       <ConfirmModal
         opened={deleteModalOpen}

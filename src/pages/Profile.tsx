@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Card, Text, Stack, Group, Button, TextInput, Avatar, Title, Modal, Loader, Center, Collapse, Alert, useMantineColorScheme } from '@mantine/core';
-import { IconUser, IconPhone, IconBrandTelegram, IconWallet, IconCreditCard, IconChevronDown, IconChevronUp, IconMail, IconAlertCircle } from '@tabler/icons-react';
+import { Card, Text, Stack, Group, Divider, Grid, Button, TextInput, Tooltip, ActionIcon, Avatar, Title, Modal, Loader, Center, Collapse, Alert, useMantineColorScheme } from '@mantine/core';
+import { IconUser, IconPhone, IconCopy, IconCheck, IconBrandTelegram, IconCreditCard, IconChevronDown, IconChevronUp, IconMail, IconAlertCircle } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { useClipboard } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 import { userApi, telegramApi } from '../api/client';
 import PayModal from '../components/PayModal';
@@ -21,6 +22,7 @@ interface UserProfile {
   email_verified?: number;
   balance: number;
   credit: number;
+  discount: number;
   bonus: number;
   gid: number;
   telegram_user_id?: number;
@@ -70,7 +72,9 @@ export default function Profile() {
   const [forecast, setForecast] = useState<ForecastData | null>(null);
   const [forecastOpen, setForecastOpen] = useState(false);
   const { colorScheme } = useMantineColorScheme();
+  const clipboard = useClipboard({ timeout: 1000 });
   const { t } = useTranslation();
+  const partnerLink = `${window.location.origin}${window.location.pathname}?partner_id=${profile?.user_id || 0}`;
 
   const updateCooldown = useCallback(() => {
     const lastSent = localStorage.getItem(RESEND_STORAGE_KEY);
@@ -338,6 +342,22 @@ export default function Profile() {
           <div>
             <Text fw={500} size="lg">{profile.full_name || profile.login || t('profile.user')}</Text>
             <Text size="sm" c="dimmed">ID: {profile.user_id} - {profile.login || '-'}</Text>
+            { profile.discount && profile.discount > 0 ? ( <Text size="xm" style={{ color: colorScheme === 'dark' ? '#4ade80' : '#16a34a' }}>{t('profile.discount')}: {profile.discount}%</Text>) : undefined}
+          </div>
+        </Group>
+
+        <Divider my="md" />
+
+        <Group>
+          <div style={{ maxWidth: '80%' }}>
+            <Text size="sm"> {partnerLink}
+              <Tooltip label={clipboard.copied ? t('common.copied') : t('common.copy')}>
+                <ActionIcon color={clipboard.copied ? 'teal' : 'gray'} variant="subtle" onClick={() => clipboard.copy(`${window.location.origin}${window.location.pathname}?partner_id=${profile.user_id}`)}>
+                  {clipboard.copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+                </ActionIcon>
+              </Tooltip>
+            </Text>
+            <Text size="xs" c="dimmed">{t('profile.partnerLinkDescription')}</Text>
           </div>
         </Group>
       </Card>
@@ -393,110 +413,118 @@ export default function Profile() {
         </Card>
       )}
 
-      <Card withBorder radius="md" p="lg">
-        <Group justify="space-between" align="center">
-          <div>
-            <Text size="sm" c="dimmed">{t('profile.balance')}</Text>
-            <Group gap="xs" align="baseline">
-              <IconWallet size={24} />
-              <Text size="xl" fw={700}>{profile.balance?.toFixed(2) || '0.00'} {t('common.currency')}</Text>
-            </Group>
-            { profile.credit && profile.credit > 0 ? ( <Text size="xm" c="dimmed">{t('profile.credit')}: {profile.credit}</Text>) : undefined}
-          </div>
-          <Button leftSection={<IconCreditCard size={18} />} onClick={() => setPayModalOpen(true)}>
-            {t('profile.topUp')}
-          </Button>
-        </Group>
-      </Card>
-
-      <Card withBorder radius="md" p="lg">
-        <Group justify="space-between" align="center">
-          <div>
-              <Text size="xm" c="dimmed">{t('profile.bonus')}: {profile.bonus}</Text>
-          </div>
-          <Button onClick={() => setPromoModalOpen(true)}>
-            {t('profile.enterPromo')}
-          </Button>
-        </Group>
-      </Card>
-
-      <Card withBorder radius="md" p="lg">
-        <Group justify="space-between" mb="md">
-          <Text fw={500}>{t('profile.personalData')}</Text>
-          {!editing ? (
-            <Button variant="light" size="xs" onClick={() => setEditing(true)}>
-              {t('common.edit')}
-            </Button>
-          ) : (
-            <Group gap="xs">
-              <Button variant="light" size="xs" color="gray" onClick={() => setEditing(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button size="xs" onClick={handleSave}>
-                {t('common.save')}
+      <Grid>
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <Card withBorder radius="md" p="lg">
+            <Group justify="space-between" align="center">
+              <div>
+                <Group gap="xs" align="baseline">
+                  {t('profile.balance')}: <Text size="xl" fw={700}>{profile.balance?.toFixed(2) || '0.00'} {t('common.currency')}</Text>
+                </Group>
+              </div>
+              <Button leftSection={<IconCreditCard size={18} />} onClick={() => setPayModalOpen(true)}>
+                {t('profile.topUp')}
               </Button>
             </Group>
-          )}
-        </Group>
+          </Card>
+        </Grid.Col>
 
-        <Stack gap="md">
-          <TextInput
-            label={t('profile.fullName')}
-            leftSection={<IconUser size={16} />}
-            value={formData.full_name}
-            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-            disabled={!editing}
-          />
-          <TextInput
-            label={t('profile.phone')}
-            leftSection={<IconPhone size={16} />}
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            disabled={!editing}
-          />
-        </Stack>
-      </Card>
-
-      <Card withBorder radius="md" p="lg">
-        <Group justify="space-between" mb="md">
-          <Text fw={500}>Email</Text>
-          <Group gap="xs">
-            {userEmail && !emailVerified && (
-              <Button
-                variant="light"
-                size="xs"
-                color="orange"
-                onClick={handleSendVerifyCode}
-                loading={verifySending}
-                disabled={resendCooldown > 0}
-              >
-                {resendCooldown > 0
-                  ? `${t('profile.verify')} (${Math.floor(resendCooldown / 60)}:${(resendCooldown % 60).toString().padStart(2, '0')})`
-                  : t('profile.verify')}
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <Card withBorder radius="md" p="lg">
+            <Group justify="space-between" align="center">
+              <div>
+                  <Text size="xm" c="dimmed">{t('profile.bonus')}: {profile.bonus}</Text>
+              </div>
+              <Button onClick={() => setPromoModalOpen(true)}>
+                {t('profile.enterPromo')}
               </Button>
-            )}
-            <Button variant="light" size="xs" onClick={openEmailModal}>
-              {userEmail ? t('profile.change') : t('profile.link')}
-            </Button>
-          </Group>
-        </Group>
-        <Group>
-          <IconMail size={24} color={emailVerified ? '#22c55e' : '#666'} />
-          {userEmail ? (
-            <div>
-              <Text size="sm">{userEmail}</Text>
-              <Text size="xs" c={emailVerified ? 'green' : 'orange'}>
-                {emailVerified ? t('profile.emailVerified') : t('profile.emailNotVerified')}
-              </Text>
-            </div>
-          ) : (
-            <Text size="sm" c="dimmed">{t('profile.emailNotLinked')}</Text>
-          )}
-        </Group>
-        <Text size="xs" c="dimmed" mt="md">
-          {t('profile.emailDescription')}
-        </Text>
-      </Card>
+            </Group>
+          </Card>
+        </Grid.Col>
+      </Grid>
+
+      <Grid>
+        <Grid.Col span={{ base: 12, md: 6 }} style={{ display: 'flex' }}>
+          <Card withBorder radius="md" p="lg" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <Group justify="space-between" mb="md">
+              <Text fw={500}>{t('profile.personalData')}</Text>
+              {!editing ? (
+                <Button variant="light" size="xs" onClick={() => setEditing(true)}>
+                  {t('common.edit')}
+                </Button>
+              ) : (
+                <Group gap="xs">
+                  <Button variant="light" size="xs" color="gray" onClick={() => setEditing(false)}>
+                    {t('common.cancel')}
+                  </Button>
+                  <Button size="xs" onClick={handleSave}>
+                    {t('common.save')}
+                  </Button>
+                </Group>
+              )}
+            </Group>
+
+            <Stack gap="md" style={{ flex: 1 }}>
+              <TextInput
+                label={t('profile.fullName')}
+                leftSection={<IconUser size={16} />}
+                value={formData.full_name}
+                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                disabled={!editing}
+              />
+              <TextInput
+                label={t('profile.phone')}
+                leftSection={<IconPhone size={16} />}
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                disabled={!editing}
+              />
+            </Stack>
+          </Card>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, md: 6 }} style={{ display: 'flex' }}>
+          <Card withBorder radius="md" p="lg" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <Group justify="space-between" mb="md">
+              <Text fw={500}>Email</Text>
+              <Group gap="xs">
+                {userEmail && !emailVerified && (
+                  <Button
+                    variant="light"
+                    size="xs"
+                    color="orange"
+                    onClick={handleSendVerifyCode}
+                    loading={verifySending}
+                    disabled={resendCooldown > 0}
+                  >
+                    {resendCooldown > 0
+                      ? `${t('profile.verify')} (${Math.floor(resendCooldown / 60)}:${(resendCooldown % 60).toString().padStart(2, '0')})`
+                      : t('profile.verify')}
+                  </Button>
+                )}
+                <Button variant="light" size="xs" onClick={openEmailModal}>
+                  {userEmail ? t('profile.change') : t('profile.link')}
+                </Button>
+              </Group>
+            </Group>
+            <Group>
+              <IconMail size={24} color={emailVerified ? '#22c55e' : '#666'} />
+              {userEmail ? (
+                <div>
+                  <Text size="sm">{userEmail}</Text>
+                  <Text size="xs" c={emailVerified ? 'green' : 'orange'}>
+                    {emailVerified ? t('profile.emailVerified') : t('profile.emailNotVerified')}
+                  </Text>
+                </div>
+              ) : (
+                <Text size="sm" c="dimmed">{t('profile.emailNotLinked')}</Text>
+              )}
+            </Group>
+            <Text size="xs" c="dimmed" mt="md">
+              {t('profile.emailDescription')}
+            </Text>
+          </Card>
+        </Grid.Col>
+      </Grid>
 
       <Card withBorder radius="md" p="lg">
         <Group justify="space-between" mb="md">
