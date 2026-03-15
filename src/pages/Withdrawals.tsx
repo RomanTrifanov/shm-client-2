@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, Stack, Loader, Center, Paper, Title, Pagination, Badge, LoadingOverlay } from '@mantine/core';
+import { Text, Stack, Loader, Center, Paper, Title, Pagination, Badge, LoadingOverlay, ScrollArea } from '@mantine/core';
 import DataTable, { Column } from '../components/DataTable';
 import { api } from '../api/client';
 
@@ -17,6 +17,25 @@ interface Withdraw {
   create_date: string;
   withdraw_date: string;
   end_date: string;
+}
+
+function formatPeriod(value: number) {
+  const { t } = useTranslation();
+  if (!value) return '---';
+
+  const [m, rest = ''] = value.toString().split('.');
+
+  const months = Number(m);
+  const days = Number(rest.slice(0, 2) || 0);
+  const hours = Number(rest.slice(2, 4) || 0);
+
+  const parts: string[] = [];
+
+  if (months) parts.push(`${months} ${t('common.months')}`);
+  if (days) parts.push(`${days} ${t('common.days')}`);
+  if (hours) parts.push(`${hours} ${t('common.hours')}`);
+
+  return parts.join(' ');
 }
 
 export default function Withdrawals() {
@@ -73,14 +92,14 @@ export default function Withdrawals() {
   const totalPages = Math.ceil(totalItems / perPage);
 
   const columns: Column<Withdraw>[] = [
-    { title: 'ID', accessor: 'withdraw_id' },
+    { title: 'ID', accessor: 'withdraw_id', sortable: true },
     { title: t('withdrawals.withdrawDate'), accessor: (w) => w.withdraw_date ? new Date(w.withdraw_date).toLocaleDateString(i18n.language === 'ru' ? 'ru-RU' : 'en-US') : '-', sortable: true, sortKey: 'withdraw_date', },
     { title: t('withdrawals.endDate'), accessor: (w) => w.end_date ? new Date(w.end_date).toLocaleDateString(i18n.language === 'ru' ? 'ru-RU' : 'en-US') : '-', sortable: true, sortKey: 'end_date', },
     { title: t('services.cost'), accessor: (w) => <Text size="sm">{w.cost} ₽</Text>, sortable: true, sortKey: 'cost' },
     { title: t('payments.discount'), accessor: (w) => w.discount > 0 ? <Text size="sm" c="green">-{w.discount}%</Text> : <Text size="sm" c="dimmed">-</Text>, sortable: true, sortKey: 'discount' },
     { title: t('profile.bonus'), accessor: (w) => w.bonus > 0 ? <Text size="sm" c="red">-{w.bonus} ₽</Text> : <Text size="sm" c="dimmed">-</Text>, sortable: true, sortKey: 'bonus' },
-    { title: t('withdrawals.total'), accessor: (w) => <Text size="sm" fw={500} w={80} c="red">-{w.total} ₽</Text>, sortable: true, sortKey: 'total'},
-    { title: t('order.period'), accessor: (w) => <Badge variant="light" color="blue">{w.months} {t('common.months')} × {w.qnt}</Badge>, sortable: true, sortKey: 'months' },
+    { title: t('withdrawals.total'), accessor: (w) => <Text size="sm" fw={500} w={80} c="red">{w.total && w.total > 0 ? '-'  : undefined }{w.total} ₽</Text>, sortable: true, sortKey: 'total'},
+    { title: t('order.period'), accessor: (w) => <Badge variant="light" color="blue">{formatPeriod(w.months)} { w.qnt && w.qnt > 1 ? ` × ${w.qnt}` : undefined }</Badge>, sortable: true, sortKey: 'months' },
   ];
   if (initialLoading) {
     return (
@@ -104,17 +123,19 @@ export default function Withdrawals() {
         <>
           <Paper withBorder radius="md" style={{ overflow: 'hidden', position: 'relative' }}>
             <LoadingOverlay visible={tableLoading} overlayProps={{ blur: 1 }} />
-            <DataTable
-              data={withdrawals}
-              columns={columns}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              onSort={(field, dir) => {
-                setSortField(field);
-                setSortDirection(dir);
-                setPage(1);
-              }}
-            />
+            <ScrollArea>
+              <DataTable
+                data={withdrawals}
+                columns={columns}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={(field, dir) => {
+                  setSortField(field);
+                  setSortDirection(dir);
+                  setPage(1);
+                }}
+              />
+            </ScrollArea>
           </Paper>
 
           {totalPages > 1 && (
@@ -123,6 +144,7 @@ export default function Withdrawals() {
             </Center>
           )}
         </>
-      )}    </Stack>
+      )}
+    </Stack>
   );
 }

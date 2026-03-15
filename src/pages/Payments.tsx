@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Text, Stack, Group, Badge, Button, Loader, Center, Paper, Title, Pagination, LoadingOverlay } from '@mantine/core';
+import { Card, Text, Stack, Group, Badge, Button, Loader, Center, Paper, Title, Pagination, LoadingOverlay, ScrollArea } from '@mantine/core';
 import { IconCreditCard, IconPlus } from '@tabler/icons-react';
 import DataTable, { Column } from '../components/DataTable';
 import { useTranslation } from 'react-i18next';
@@ -119,17 +119,19 @@ export default function Payments() {
         <>
           <Paper withBorder radius="md" style={{ overflow: 'hidden', position: 'relative' }}>
             <LoadingOverlay visible={tableLoading} overlayProps={{ blur: 1 }} />
-            <DataTable
-              data={payments}
-              columns={columns}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              onSort={(field, dir) => {
-                setSortField(field);
-                setSortDirection(dir);
-                setPage(1);
-              }}
-            />
+            <ScrollArea>
+              <DataTable
+                data={payments}
+                columns={columns}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={(field, dir) => {
+                  setSortField(field);
+                  setSortDirection(dir);
+                  setPage(1);
+                }}
+              />
+            </ScrollArea>
           </Paper>
 
           {totalPages > 1 && (

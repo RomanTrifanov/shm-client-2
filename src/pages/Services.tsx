@@ -57,12 +57,16 @@ const statusColors: Record<string, string> = {
 };
 
 function normalizeCategory(category: string): string {
-  if ( config.PROXY_CATEGORY === category ) {
+  const proxyCategories = new Set(config.PROXY_CATEGORY.split(','));
+  const vpnCategories = new Set(config.VPN_CATEGORY.split(','));
+
+  if (proxyCategories.has(category)) {
     return 'proxy';
   }
-  if ( config.VPN_CATEGORY === category ) {
+  if ( vpnCategories.has(category) ) {
     return 'vpn';
   }
+
   if (category.match(/remna|remnawave|marzban|marz|mz/i)) {
     return 'proxy';
   }
@@ -124,9 +128,9 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
     }
   };
 
-  const canDelete = ['BLOCK', 'NOT PAID', 'ERROR'].includes(service.status);
-  const canStop = service.status === 'ACTIVE';
-  const canChange = ['BLOCK', 'ACTIVE'].includes(service.status);
+  const canDelete = config.ALLOW_SERVICE_DELETE === 'true' && ['BLOCK', 'NOT PAID', 'ERROR'].includes(service.status);
+  const canStop = config.ALLOW_SERVICE_BLOCKED === 'true' && service.status === 'ACTIVE';
+  const canChange = config.ALLOW_SERVICE_CHANGE === 'true' && ['BLOCK', 'ACTIVE'].includes(service.status);
   const isNotPaid = service.status === 'NOT PAID';
 
   useEffect(() => {

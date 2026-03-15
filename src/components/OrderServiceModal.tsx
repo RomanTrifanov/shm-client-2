@@ -232,7 +232,12 @@ export default function OrderServiceModal({
 
     setOrdering(true);
     try {
-      const finishActive = canDeferChange && finishAfterActive ? 1 : 0;
+      let finishActive;
+      if (config.ALLOW_SERVICE_CHANGE_FORCE === 'true') {
+        finishActive = 1;
+      } else {
+        finishActive = canDeferChange && finishAfterActive ? 1 : 0;
+      }
       await userApi.changeService(currentService.user_service_id, selectedService.service_id, finishActive);
 
       notifications.show({
@@ -376,12 +381,15 @@ export default function OrderServiceModal({
 
           {isChangeMode ? (
             <Stack gap="sm">
-              {canDeferChange && (
+              {config.ALLOW_SERVICE_CHANGE_FORCE === 'false' && canDeferChange && (
                 <Checkbox
                   label={t('services.changeAfterEnd')}
                   checked={finishAfterActive}
                   onChange={(event) => setFinishAfterActive(event.currentTarget.checked)}
                 />
+              )}
+              {config.ALLOW_SERVICE_CHANGE_FORCE === 'true' && (
+                <Text>{t('services.changeAfterEnd')}</Text>
               )}
               <Button
                 fullWidth
