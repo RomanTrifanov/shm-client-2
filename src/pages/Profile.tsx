@@ -47,7 +47,7 @@ interface ForecastData {
 }
 
 export default function Profile() {
-  const { telegramPhoto, setUserEmail } = useStore();
+  const { telegramPhoto, setUserEmail, setUserEmailVerified } = useStore();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -180,6 +180,7 @@ export default function Profile() {
       setUserEmail(data.email || null);
     }
     setEmailVerified(data.email_verified || 0 );
+    setUserEmailVerified(data.email_verified || 0 );
   };
 
   const openTelegramModal = () => {
@@ -359,6 +360,7 @@ export default function Profile() {
       }
 
       setEmailVerified(1);
+      setUserEmailVerified(1);
       setVerifyModalOpen(false);
       notifications.show({
         title: t('common.success'),

@@ -45,6 +45,7 @@ services:
 | `TELEGRAM_BOT_NAME` | Username Telegram бота (без @) s| - |
 | `TELEGRAM_BOT_AUTH_ENABLE` | Включить авторизацию через Telegram виджет | `false` |
 | `TELEGRAM_WEBAPP_AUTH_ENABLE` | Авторизация через телеграмм вебапп | `false` |
+| `TELEGRAM_WEBAPP_AUTO_AUTH_ENABLE` | Автоматическая авторизация через телеграмм вебапп | `false` |
 | `TELEGRAM_WEBAPP_PROFILE` | Название бота (профиля) в SHM | - |
 | `SUPPORT_LINK` | Ссылка на поддержку | - |
 | `OTP_ENABLE` | Показать настройки OTP | `true` |
@@ -59,6 +60,7 @@ services:
 | `VPN_STORAGE_PREFIX` | Префикс для категории vpn в хранилище например 'wg_key_' | 'vpn' |
 | `VISIBLE_CATEGORIES` | Категории для отображения при покупке и уже купленных услуг (vpn-mz,vpm-mz-trial)| - |
 | `EMAIL_REQUIRED` | Hе дает пользоваться ЛК пока клиент не введет email | false |
+| `EMAIL_VERIFY_REQUIRED` | Hе дает заказать услугу пока email не будет подтвержден | false |
 | `ALLOW_SERVICE_BLOCKED` | Разрешить пользователю блокировать услугу | true |
 | `ALLOW_SERVICE_DELETE` | Разрешить пользователю удалять услугу | true |
 | `ALLOW_SERVICE_CHANGE` | Разрешить пользователю сменить услугу | true |

@@ -17,6 +17,7 @@ interface User {
 interface AppState {
   user: User | null;
   userEmail: string | null;
+  userEmailVerified: number | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   telegramPhoto: string | null;
@@ -25,6 +26,7 @@ interface AppState {
 
   setUser: (user: User | null) => void;
   setUserEmail: (email: string | null) => void;
+  setUserEmailVerified: (verified: number | 0) => void;
   setIsLoading: (loading: boolean) => void;
   setTelegramPhoto: (photo: string | null) => void;
   setHasNewTicketMessages: (hasNew: boolean) => void;
@@ -35,6 +37,7 @@ interface AppState {
 export const useStore = create<AppState>((set) => ({
   user: null,
   userEmail: null,
+  userEmailVerified: null,
   isAuthenticated: false,
   isLoading: true,
   telegramPhoto: localStorage.getItem('shm_telegram_photo'),
@@ -46,6 +49,7 @@ export const useStore = create<AppState>((set) => ({
     isAuthenticated: !!user,
   }),
   setUserEmail: (email) => set({ userEmail: email }),
+  setUserEmailVerified: (verified) => set({ userEmailVerified: verified }),
   setIsLoading: (loading) => set({ isLoading: loading }),
   setTelegramPhoto: (photo) => {
     if (photo) {

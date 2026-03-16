@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Text, Stack, Group, Badge, Button, Modal, ActionIcon, Loader, Center, Paper, Title, Tabs, Code, Tooltip, Accordion, Box, Select, NumberInput, Pagination } from '@mantine/core';
 import { IconQrcode, IconCopy, IconCheck, IconDownload, IconRefresh, IconTrash, IconPlus, IconPlayerStop, IconExchange, IconCreditCard, IconWallet } from '@tabler/icons-react';
 import { useDisclosure, useClipboard } from '@mantine/hooks';
@@ -9,6 +10,7 @@ import QrModal from '../components/QrModal';
 import OrderServiceModal from '../components/OrderServiceModal';
 import ConfirmModal from '../components/ConfirmModal';
 import { config } from '../config';
+import { useStore } from '../store/useStore';
 
 interface ForecastItem {
   name: string;
@@ -675,6 +677,13 @@ export default function Services() {
   const [categoryPages, setCategoryPages] = useState<Record<string, number>>({});
   const perPage = 5;
   const { t } = useTranslation();
+  const { userEmailVerified } = useStore();
+  const [confirmEmailNotVerified, setConfirmEmailNotVerified] = useState(false);
+  const navigate = useNavigate();
+
+  const handleEmailNotVerified = async () => {
+    navigate('/');
+  };
 
   const fetchServices = async (background = false) => {
     if (!background) setLoading(true);
@@ -792,7 +801,7 @@ export default function Services() {
       <Group justify="space-between">
         <Title order={2}>{t('services.title')}</Title>
         <Group>
-          <Button leftSection={<IconPlus size={16} />} onClick={openOrderModal}>
+          <Button leftSection={<IconPlus size={16} />} onClick={ config.EMAIL_VERIFY_REQUIRED && !userEmailVerified ? () => setConfirmEmailNotVerified(true) : openOrderModal}>
             {t('services.orderService')}
           </Button>
           <Button leftSection={<IconRefresh size={16} />} variant="light" onClick={() => fetchServices()}>
@@ -806,7 +815,7 @@ export default function Services() {
           <Center>
             <Stack align="center" gap="md">
               <Text c="dimmed">{t('services.noServices')}</Text>
-              <Button leftSection={<IconPlus size={16} />} onClick={openOrderModal}>
+              <Button leftSection={<IconPlus size={16} />} onClick={ config.EMAIL_VERIFY_REQUIRED && !userEmailVerified ? () => setConfirmEmailNotVerified(true) : openOrderModal}>
                 {t('services.orderService')}
               </Button>
             </Stack>
@@ -921,6 +930,17 @@ export default function Services() {
           fetchServices();
         }}
       />
+
+      <ConfirmModal
+        opened={confirmEmailNotVerified}
+        onClose={() => setConfirmEmailNotVerified(false)}
+        onConfirm={handleEmailNotVerified}
+        title={t('services.emailNotVerifiedtitle')}
+        message={t('services.emailNotVerifiedDesc')}
+        confirmLabel={t('services.emailNotVerifiedAction')}
+        confirmColor="orange"
+      />
+
     </Stack>
   );
 }

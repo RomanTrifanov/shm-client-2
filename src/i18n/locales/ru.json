@@ -187,7 +187,10 @@
     "payService": "Оплатить {{amount}} ₽",
     "savings": "Вы экономите {{amount}} ₽ с учётом скидки",
     "savings_bonus": "Спишем {{amount}} ₽ бонусами",
-    "profit": "Ваша выгода {{amount}} ₽ с учётом скидки и бонусов"
+    "profit": "Ваша выгода {{amount}} ₽ с учётом скидки и бонусов",
+    "emailNotVerifiedtitle": "Не удалось подтвердить email",
+    "emailNotVerifiedDesc": "Для заказа услуги необходимо подтвердить email.",
+    "emailNotVerifiedAction": "Подтвердить email"
   },
   "categories": {
     "vpn": "VPN",
