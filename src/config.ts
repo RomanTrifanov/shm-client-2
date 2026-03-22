@@ -25,6 +25,20 @@ interface AppConfig {
   ALLOW_SERVICE_CHANGE: string;
   ALLOW_SERVICE_CHANGE_FORCE: string;
   ALLOW_TELEGRAM_PIN: string;
+  APP_WINDOWS_URL: string;
+  APP_LINUX_URL: string;
+  APP_MAC_URL: string;
+  APP_IOS_URL: string;
+  APP_ANDROID_URL: string;
+  APP_APPLE_TV_URL: string;
+  APP_ANDROID_TV_URL: string;
+  WINDOWS_APP_NAME: string;
+  LINUX_APP_NAME: string;
+  MAC_APP_NAME: string;
+  IOS_APP_NAME: string;
+  ANDROID_APP_NAME: string;
+  APPLE_TV_APP_NAME: string;
+  ANDROID_TV_APP_NAME: string;
 }
 
 declare global {
@@ -63,6 +77,20 @@ function getConfig(): AppConfig {
     ALLOW_SERVICE_CHANGE: runtimeConfig?.ALLOW_SERVICE_CHANGE || import.meta.env.VITE_ALLOW_SERVICE_CHANGE || 'true',
     ALLOW_SERVICE_CHANGE_FORCE: runtimeConfig?.ALLOW_SERVICE_CHANGE_FORCE || import.meta.env.VITE_ALLOW_SERVICE_CHANGE_FORCE || 'false',
     ALLOW_TELEGRAM_PIN: runtimeConfig?.ALLOW_TELEGRAM_PIN || import.meta.env.VITE_ALLOW_TELEGRAM_PIN || 'true',
+    APP_WINDOWS_URL: runtimeConfig?.APP_WINDOWS_URL || import.meta.env.VITE_APP_WINDOWS_URL || 'https://github.com/Happ-proxy/happ-desktop/releases/latest/download/setup-Happ.x64.exe',
+    APP_LINUX_URL: runtimeConfig?.APP_LINUX_URL || import.meta.env.VITE_APP_LINUX_URL || 'https://github.com/Happ-proxy/happ-desktop/releases/latest/download/Happ.linux.x64.deb',
+    APP_MAC_URL: runtimeConfig?.APP_MAC_URL || import.meta.env.VITE_APP_MAC_URL || 'https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973',
+    APP_IOS_URL: runtimeConfig?.APP_IOS_URL || import.meta.env.VITE_APP_IOS_URL || 'https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973',
+    APP_ANDROID_URL: runtimeConfig?.APP_ANDROID_URL || import.meta.env.VITE_APP_ANDROID_URL || 'https://play.google.com/store/apps/details?id=com.happproxy',
+    APP_APPLE_TV_URL: runtimeConfig?.APP_APPLE_TV_URL || import.meta.env.VITE_APP_APPLE_TV_URL || 'https://apps.apple.com/us/app/happ-proxy-utility-for-tv/id6748297274',
+    APP_ANDROID_TV_URL: runtimeConfig?.APP_ANDROID_TV_URL || import.meta.env.VITE_APP_ANDROID_TV_URL || 'https://play.google.com/store/apps/details?id=com.happproxy',
+    WINDOWS_APP_NAME: runtimeConfig?.WINDOWS_APP_NAME || import.meta.env.VITE_WINDOWS_APP_NAME || 'Скачать для Windows',
+    LINUX_APP_NAME: runtimeConfig?.LINUX_APP_NAME || import.meta.env.VITE_LINUX_APP_NAME || 'Скачать для Linux',
+    MAC_APP_NAME: runtimeConfig?.MAC_APP_NAME || import.meta.env.VITE_MAC_APP_NAME || 'Скачать для Mac',
+    IOS_APP_NAME: runtimeConfig?.IOS_APP_NAME || import.meta.env.VITE_IOS_APP_NAME || 'Скачать для iOS',
+    ANDROID_APP_NAME: runtimeConfig?.ANDROID_APP_NAME || import.meta.env.VITE_ANDROID_APP_NAME || 'Скачать для Android',
+    APPLE_TV_APP_NAME: runtimeConfig?.APPLE_TV_APP_NAME || import.meta.env.VITE_APPLE_TV_APP_NAME || 'Скачать для Apple TV',
+    ANDROID_TV_APP_NAME: runtimeConfig?.ANDROID_TV_APP_NAME || import.meta.env.VITE_ANDROID_TV_APP_NAME || 'Скачать для Android TV',
   };
 }
 

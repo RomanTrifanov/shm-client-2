@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Text, Stack, Group, Badge, Button, Modal, ActionIcon, Loader, Center, Paper, Title, Tabs, Code, Tooltip, Accordion, Box, Select, NumberInput, Pagination } from '@mantine/core';
+import { Card, Text, Stack, Group, Badge, Button, Divider, Modal, ActionIcon, Loader, Center, Paper, Title, Tabs, Code, Tooltip, Accordion, Box, Select, NumberInput, Pagination } from '@mantine/core';
 import { IconQrcode, IconCopy, IconCheck, IconDownload, IconRefresh, IconTrash, IconPlus, IconPlayerStop, IconExchange, IconCreditCard, IconWallet, IconDeviceMobileCog } from '@tabler/icons-react';
 import { useDisclosure, useClipboard } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import { notifications } from '@mantine/notifications';
 import QrModal from '../components/QrModal';
 import OrderServiceModal from '../components/OrderServiceModal';
 import ConfirmModal from '../components/ConfirmModal';
+import AppDownloadBlock from '../components/AppDownloadBlock';
 import { config } from '../config';
 import { useStore } from '../store/useStore';
 import { isTelegramWebApp } from '../constants/webapp';
@@ -261,7 +262,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
   };
 
   const handleConfigure = () => {
-    const link = subscriptionUrl;
+    const link = `happ://add/${subscriptionUrl}`;
     if ( link ) {
       const tgWebApp = window.Telegram?.WebApp;
       if (tgWebApp && isTelegramWebApp) {
@@ -423,30 +424,36 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
                       </ActionIcon>
                     </Tooltip>
                   </Group>
-                  <Button
-                    color="green"
-                    variant="light"
-                    leftSection={<IconDeviceMobileCog size={16} />}
-                    onClick={() => handleConfigure()}
-                    mt="md"
-                    fullWidth
-                  >
-                    {t('services.DeviceConfig')}
-                  </Button>
+
+                  <Divider my="md" />
+
+                  <Group gap="xs">
+
+                    <AppDownloadBlock />
+
+                    {(isVpn && storageData) || (isProxy && subscriptionUrl) ? (
+                      <Button
+                        leftSection={<IconQrcode size={16} />}
+                        variant="light"
+                        onClick={() => setQrModalOpen(true)}
+                      >
+                        {t('services.qrCode')}
+                      </Button>
+                    ) : null}
+                    <Button
+                      component="a"
+                      color="green"
+                      onClick={() => handleConfigure()}
+                      leftSection={<IconDeviceMobileCog size={16} />}
+                      variant="light"
+                    >
+                      {t('services.DeviceConfig')}
+                    </Button>
+                  </Group>
                 </Paper>
               )}
 
               <Group>
-                {(isVpn && storageData) || (isProxy && subscriptionUrl) ? (
-                  <Button
-                    leftSection={<IconQrcode size={16} />}
-                    variant="light"
-                    onClick={() => setQrModalOpen(true)}
-                    fullWidth={!isVpn}
-                  >
-                    {t('services.qrCode')}
-                  </Button>
-                ) : null}
 
               {isVpn && storageData && (
                 <Button
@@ -835,6 +842,12 @@ export default function Services() {
         </Group>
       </Group>
 
+      <Card withBorder radius="md" p="lg">
+        <Group justify="space-between" mb="sm">
+          <Text fw={500}>{t('apps.downloadTitle')}</Text>
+        </Group>
+        <AppDownloadBlock />
+      </Card>
       {Object.keys(groupedServices).length === 0 ? (
         <Paper withBorder p="xl" radius="md">
           <Center>

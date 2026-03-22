@@ -415,10 +415,10 @@ function AppContent() {
           <WebAppHeader />
           <Box px="md">
             <Routes>
-              <Route path="/services" element={<Services />} />
               <Route path="/payments" element={<Payments />} />
               <Route path="/withdrawals" element={<Withdrawals />} />
-              <Route path="/" element={<Profile />} />
+              <Route path="/" element={<Services />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Box>
@@ -484,7 +484,7 @@ function AppContent() {
               })}
             </Group>
             <Group>
-              <Text size="sm" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>{user?.login}</Text>
+              <Text size="sm" style={{ cursor: 'pointer' }} onClick={() => navigate('/profile')}>{user?.login}</Text>
               { config.SUPPORT_LINK &&  <ActionIcon
                 onClick={handleSupportLink}
                 variant="subtle"
@@ -511,10 +511,10 @@ function AppContent() {
 
         <AppShell.Main>
           <Routes>
-            <Route path="/services" element={<Services />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/withdrawals" element={<Withdrawals />} />
-            <Route path="/" element={<Profile />} />
+            <Route path="/" element={<Services />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppShell.Main>

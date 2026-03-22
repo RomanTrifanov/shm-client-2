@@ -77,6 +77,21 @@ services:
 | `ALLOW_SERVICE_CHANGE` | Разрешить пользователю сменить услугу | true |
 | `ALLOW_SERVICE_CHANGE_FORCE` | Разрешить сменить услугу сразу (не спрашивая пользователя) | false |
 | `ALLOW_TELEGRAM_PIN` | Разрешить привязку аккаунта Telegram | true |
+| `APP_WINDOWS_URL` | Ссылка на скачивание приложения для Windows | - |
+| `APP_LINUX_URL` | Ссылка на скачивание приложения для Linux | - |
+| `APP_MAC_URL` | Ссылка на скачивание приложения для macOS | - |
+| `APP_IOS_URL` | Ссылка на скачивание приложения для iOS | - |
+| `APP_ANDROID_URL` | Ссылка на скачивание приложения для Android | - |
+| `APP_APPLE_TV_URL` | Ссылка на скачивание приложения для Apple TV | - |
+| `APP_ANDROID_TV_URL` | Ссылка на скачивание приложения для Android TV | - |
+| `WINDOWS_APP_NAME` | Название кнопки скачивания для Windows | `Скачать для Windows` |
+| `LINUX_APP_NAME` | Название кнопки скачивания для Linux | `Скачать для Linux` |
+| `MAC_APP_NAME` | Название кнопки скачивания для macOS | `Скачать для Mac` |
+| `IOS_APP_NAME` | Название кнопки скачивания для iOS | `Скачать для iOS` |
+| `ANDROID_APP_NAME` | Название кнопки скачивания для Android | `Скачать для Android` |
+| `APPLE_TV_APP_NAME` | Название кнопки скачивания для Apple TV | `Скачать для Apple TV` |
+| `ANDROID_TV_APP_NAME` | Название кнопки скачивания для Android TV | `Скачать для Android TV` |
+
 
 ### Telegram Widget
 Для работы с авторизацией через Telegram Widget нужно в астройках бота  который указан в `TELGRAM_BOT_NAME` указать домен на котором расположена ваше приложение `shm-client`

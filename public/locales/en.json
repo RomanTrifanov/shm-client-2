@@ -77,6 +77,7 @@
   },
   "nav": {
     "home": "Home",
+    "profile": "Profile",
     "services": "Services",
     "tickets": "Support",
     "payments": "Payments",
@@ -148,7 +149,9 @@
     "user": "User",
     "telegramDescription": "Linking Telegram will allow you to receive notifications about the status of services and payments, as well as pay for Telegram services with stars.",
     "partnerLink": "Partner link",
-    "partnerLinkDescription": "Invite friends and receive bonuses for their orders and payments."
+    "partnerLinkDescription": "Invite friends and receive bonuses for their orders and payments.",
+    "payHistory": "Payment history",
+    "wdHistory": "Withdrawal history"
   },
   "services": {
     "title": "My Services",
@@ -163,14 +166,15 @@
     "validUntilNext": "Next plan",
     "includedServices": "Included services",
     "subscriptionLink": "Subscription link",
-    "qrCode": "QR Code",
+    "qrCode": "QR",
     "downloadConfig": "Download config",
+    "download": "Download",
     "downloadQr": "Download QR",
     "qrTooLong": "Configuration too large",
     "qrTooLongDesc": "The configuration is too large to display as a QR code. Please download the config file instead.",
     "vpnQrTitle": "VPN configuration QR code",
     "subscriptionQrTitle": "Subscription link QR code",
-    "DeviceConfig": "Configure connection",
+    "DeviceConfig": "Add VPN to app",
     "changeService": "Change plan",
     "changeServiceTitle": "Change plan",
     "changeServiceSuccess": "Plan changed",
@@ -282,6 +286,10 @@
     "withdrawDate": "Withdrawal date",
     "endDate": "End date",
     "total": "Total"
+  },
+  "apps": {
+    "downloadTitle": "Download app",
+    "otherPlatforms": "Other platforms"
   },
   "otp": {
     "title": "Two-Factor Authentication",
