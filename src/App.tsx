@@ -3,7 +3,7 @@ import '@mantine/notifications/styles.css';
 import { useEffect, useState } from 'react';
 import { MantineProvider, createTheme, AppShell, Group, Text, ActionIcon, useMantineColorScheme, useComputedColorScheme, Center, Loader, Box, Button, Modal, TextInput, Stack } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
-import { useMediaQuery } from '@mantine/hooks';
+import { useMediaQuery, useHotkeys, useLongPress } from '@mantine/hooks';
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { IconSun, IconMoon, IconLogout, IconHeadset } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
@@ -69,9 +69,10 @@ function ThemeToggle() {
   );
 }
 
-function WebAppHeader() {
+function WebAppHeader({ onShowVersion }: { onShowVersion?: () => void }) {
   const navigate = useNavigate();
   const { logout, user } = useStore();
+  const longPressProps = useLongPress(onShowVersion ?? (() => {}));
   const computedColorScheme = useComputedColorScheme('light');
   const { setColorScheme } = useMantineColorScheme();
 
@@ -97,7 +98,7 @@ function WebAppHeader() {
 
   return (
     <Group justify="flex-end" p="sm" gap="xs">
-     <Text size="sm" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>{user?.login}</Text>
+     <Text size="sm" style={{ cursor: 'pointer' }} onClick={() => navigate('/')} {...longPressProps}>{user?.login}</Text>
      { config.SUPPORT_LINK &&  <ActionIcon
         onClick={handleSupportLink}
         variant="subtle"
@@ -231,6 +232,9 @@ function AppContent() {
 
   const [payHistoryOpen, setPayHistoryOpen] = useState(false);
   const [withdrawHistoryOpen, setWithdrawHistoryOpen] = useState(false);
+  const [versionOpen, setVersionOpen] = useState(false);
+  const showVersion = () => setVersionOpen(true);
+  const longPressProps = useLongPress(showVersion);
 
   const handleSupportLink = () => {
     if (config.SUPPORT_LINK) {
@@ -319,6 +323,10 @@ function AppContent() {
 
     checkAuth();
   }, [setUser, setIsLoading]);
+
+  useHotkeys([
+    ['shift + V', () => setVersionOpen(true)],
+  ]);
 
   if (isLoading) {
     return (
@@ -415,13 +423,20 @@ function AppContent() {
     </Modal>
   );
 
+  const versionModal = (
+    <Modal opened={versionOpen} onClose={() => setVersionOpen(false)} title="Version" size="xs" centered>
+      <Text size="sm" ff="monospace" ta="center" py="xs">{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} {  }</Text>
+    </Modal>
+  );
+
   if (isTelegramWebApp || isMobile) {
     return (
       <>
         {emailRequiredModal}
         {verifyRequiredModal}
+        {versionModal}
         <Box style={{ minHeight: '100vh', paddingBottom: 100 }}>
-          <WebAppHeader />
+          <WebAppHeader onShowVersion={showVersion} />
           <Box px="md">
             <Routes>
               <Route path="/" element={<Services />} />
@@ -444,6 +459,7 @@ function AppContent() {
     <>
       {emailRequiredModal}
       {verifyRequiredModal}
+      {versionModal}
       <AppShell
         header={{ height: 60 }}
         padding="md"
@@ -469,6 +485,7 @@ function AppContent() {
                 onClick={() => navigate('/')}
                 style={{ cursor: 'pointer' }}
                 visibleFrom={config.APP_NAME.length > 10 ? 'sm' : undefined}
+                {...longPressProps}
               >
                 {config.APP_NAME}
               </Text>
